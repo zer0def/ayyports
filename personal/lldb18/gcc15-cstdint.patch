@@ -1,0 +1,11 @@
+diff --git a/include/lldb/lldb-forward.h b/include/lldb/lldb-forward.h
+--- a/include/lldb/lldb-forward.h
++++ b/include/lldb/lldb-forward.h
+@@ -9,6 +9,7 @@
+ #ifndef LLDB_LLDB_FORWARD_H
+ #define LLDB_LLDB_FORWARD_H
+ 
++#include <cstdint>
+ #include <memory>
+ 
+ // lldb forward declarations

@@ -1,0 +1,76 @@
+# Contributor: Alex Yam <alex@alexyam.com>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+# NOTE: Upgrade together with the whole LLVM suite.
+pkgver=19.1.7
+_llvmver="${pkgver%%.*}"
+pkgname="wasi-compiler-rt${_llvmver}"
+_wasi_sdk_ver=wasi-sdk-25
+pkgrel=2
+pkgdesc="WASI LLVM compiler runtime"
+url="https://compiler-rt.llvm.org/"
+arch="all"
+options="!check" # TODO: check
+license="Apache-2.0 WITH LLVM-exception"
+makedepends="
+	clang~$_llvmver
+	clang$_llvmver
+	cmake
+	libxml2-dev
+	llvm$_llvmver-dev
+	llvm$_llvmver-static
+	llvm$_llvmver-gtest
+	python3-dev
+	samurai
+	wasi-libc
+	wasi-libcxx$_llvmver
+	zlib-dev
+	"
+source="https://github.com/llvm/llvm-project/releases/download/llvmorg-$pkgver/llvm-project-$pkgver.src.tar.xz
+	wasi-sdk-$_wasi_sdk_ver.tar.gz::https://github.com/WebAssembly/wasi-sdk/archive/refs/tags/$_wasi_sdk_ver.tar.gz
+	"
+builddir="$srcdir"/llvm-project-$pkgver.src
+
+prepare() {
+	default_prepare
+
+	mv "$srcdir"/wasi-sdk-$_wasi_sdk_ver/wasi-sdk.cmake "$builddir"
+	mv "$srcdir"/wasi-sdk-$_wasi_sdk_ver/cmake/Platform cmake
+}
+
+build() {
+	export CFLAGS="$CFLAGS -fno-exceptions --sysroot=/usr/share/wasi-sysroot"
+	export CXXFLAGS="$CXXFLAGS -fno-exceptions --sysroot=/usr/share/wasi-sysroot"
+	export CC=clang-$_llvmver CXX=clang++-$_llvmver
+
+	export CMAKE_C_COMPILER="clang-${_llvmver}" \
+		CMAKE_CXX_COMPILER="clang++-${_llvmver}" \
+		CMAKE_POLICY_VERSION_MINIMUM=3.5
+	cmake --trace -B build -G Ninja -S compiler-rt -Wno-dev \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_MODULE_PATH="$builddir"/cmake \
+		-DCMAKE_TOOLCHAIN_FILE="$builddir"/wasi-sdk.cmake \
+		-DCMAKE_C_COMPILER_WORKS=ON \
+		-DCMAKE_CXX_COMPILER_WORKS=ON \
+		-DCOMPILER_RT_BAREMETAL_BUILD=ON \
+		-DCOMPILER_RT_INCLUDE_TESTS=OFF \
+		-DCOMPILER_RT_HAS_FPIC_FLAG=OFF \
+		-DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+		-DCOMPILER_RT_OS_DIR=wasi \
+		-DCMAKE_AR=/usr/bin/llvm$_llvmver-ar \
+		-DCMAKE_RANLIB=/usr/bin/llvm$_llvmver-ranlib \
+		-DWASI_SDK_PREFIX=/usr \
+		-DCMAKE_INSTALL_PREFIX=/usr/lib/llvm$_llvmver/lib/clang/$_llvmver/ \
+		-DCMAKE_SYSROOT=/usr/share/wasi-sysroot
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+
+	rm -r "$pkgdir"/usr/lib/llvm$_llvmver/lib/clang/$_llvmver/include
+}
+
+sha512sums="
+c7d63286d662707a9cd54758c9e3aaf52794a91900c484c4a6efa62d90bc719d5e7a345e4192feeb0c9fd11c82570d64677c781e5be1d645556b6aa018e47ec8  llvm-project-${pkgver}.src.tar.xz
+5124c31a16243683e3282180cdef00491e731a61a85dba36debff3b12093f196a3e34b8666351a6d498e264766cd0c1c1e72b70fc54f6a673753f69e9b95a215  wasi-sdk-${_wasi_sdk_ver}.tar.gz
+"

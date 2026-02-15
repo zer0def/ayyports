@@ -1,0 +1,205 @@
+# Contributor: Eric Molitor <eric@molitor.org>
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+# Note: Update together with llvm.
+pkgver=16.0.6
+_llvmver=${pkgver%%.*}
+_pkgname=llvm-runtimes
+pkgname="${_pkgname%-*}${_llvmver}-${_pkgname#*-}"
+pkgrel=2
+pkgdesc="LLVM $_llvmver Runtimes"
+url="https://llvm.org/"
+arch="all"
+license="Apache-2.0"
+makedepends="
+	abuild>=3.15.0-r5
+	clang$_llvmver
+	cmake
+	linux-headers
+	llvm$_llvmver-dev
+	llvm$_llvmver-static
+	python3
+	samurai
+	"
+subpackages="
+	libc++$_llvmver:libcxx
+	libc++$_llvmver-static:libcxx_static
+	libc++$_llvmver-dev:libcxx_dev
+	compiler-rt$_llvmver:rt
+	llvm$_llvmver-libunwind:libunwind
+	llvm$_llvmver-libunwind-static:libunwind_static
+	llvm$_llvmver-libunwind-dev:libunwind_dev
+	"
+#_default_runtimes="no"
+#[ "${_default_runtimes}" != "yes" ] || subpackages="${subpackages} libc++:_default_libcpp:noarch llvm-libunwind:_default_unwind:noarch"
+subpackages="${subpackages} libc++:_default_libcpp:noarch llvm-libunwind:_default_unwind:noarch"
+source="https://github.com/llvm/llvm-project/releases/download/llvmorg-${pkgver//_/-}/llvm-project-${pkgver//_/}.src.tar.xz
+	armv6-arch.patch.noauto
+	compiler-rt-lsan-dtp-offset.patch
+	compiler-rt-ppc-fixes.patch
+	compiler-rt-sanitizer-supported-arch.patch
+	fix-msan-with-musl.patch
+	d97981c98a70ebeaa8901f34921b0a69a068ff5d.patch
+	"
+builddir="$srcdir/llvm-project-${pkgver//_/}.src"
+options="!check !tracedeps"
+
+# NOTE: It seems that there's no (sane) way how to change includedir, sharedir
+# etc. separately, just the CMAKE_INSTALL_PREFIX. Standard CMake variables and
+# even  LLVM-specific variables, that are related to these paths, actually
+# don't work (in llvm 3.7).
+#
+# When building a software that depends on LLVM, utility llvm-config should be
+# used to discover where is LLVM installed. It provides options to print
+# path of bindir, includedir, and libdir separately, but in its source, all
+# these paths are actually hard-coded against INSTALL_PREFIX. We can patch it
+# and move paths manually, but I'm really not sure what it may break...
+#
+# Also note that we should *not* add version suffix to files in llvm bindir!
+# It breaks build system of some software that depends on LLVM, because they
+# don't expect these files to have a sufix.
+#
+# So, we install all the LLVM files into /usr/lib/llvm$_llvmver.
+# BTW, Fedora and Debian do the same thing.
+#
+_prefix="usr/lib/llvm$_llvmver"
+
+case "$CARCH" in
+# Sanitizers are broken on other arches.
+# Keep in sync with compiler-rt-sanitizer-supported-arch.patch.
+aarch64|ppc64le|x86_64|riscv64|loongarch64)
+	_build_sanitizers='ON'
+	;;
+*)
+	_build_sanitizers='OFF'
+	;;
+esac
+
+prepare() {
+	default_prepare
+
+	case "$CARCH" in
+	armhf)
+		patch -Np1 < "$srcdir"/armv6-arch.patch.noauto
+		;;
+	esac
+}
+
+build() {
+	if [ "$CBUILD" != "$CHOST" ]; then
+		local crossopts="
+			-DCMAKE_SYSTEM_NAME=Linux
+			-DCMAKE_HOST_SYSTEM_NAME=Linux
+			-DLIBUNWIND_SYSROOT=$CBUILDROOT
+			"
+	fi
+
+	if [ "$CARCH" = "armhf" ]; then
+		# Requires Thumb2, which we don't require
+		local opts="-DCOMPILER_RT_ARM_OPTIMIZED_FP=OFF"
+	fi
+
+	CC=clang-$_llvmver CXX=clang++-$_llvmver \
+	CFLAGS="$CFLAGS -DNDEBUG -DSANITIZER_CAN_USE_PREINIT_ARRAY=0" \
+	CXXFLAGS="$CXXFLAGS -DNDEBUG -DSANITIZER_CAN_USE_PREINIT_ARRAY=0" \
+	cmake --trace -B build -G Ninja -Wno-dev -S runtimes \
+		-DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind;libcxx;libcxxabi" \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/$_prefix \
+		-DCMAKE_INSTALL_RPATH=/$_prefix \
+		-DLIBCXX_HAS_MUSL_LIBC=ON \
+		-DLIBUNWIND_HAS_NODEFAULTLIBS_FLAG=OFF \
+		-DCOMPILER_RT_INCLUDE_TESTS="$(want_check && echo ON || echo OFF)" \
+		-DCOMPILER_RT_BUILD_SANITIZERS=$_build_sanitizers \
+		-DCOMPILER_RT_INSTALL_PATH="/$_prefix/lib/clang/$_llvmver" \
+		-DCOMPILER_RT_BUILD_GWP_ASAN=OFF \
+		-DCMAKE_VERBOSE_MAKEFILE=ON \
+		$crossopts $opts
+	cmake --build build
+}
+
+package() {
+	# create target triple dir and a relative symlink to it
+	local clangruntimedir="$(clang-$_llvmver -print-runtime-dir)"
+	install -dm0755 "$pkgdir"/"$clangruntimedir"
+	ln -sfv "${clangruntimedir##*/}" "$pkgdir"/"${clangruntimedir%/*}"/linux
+
+	DESTDIR="$pkgdir" cmake --install build
+
+	install -dm0755 "$pkgdir"/$_prefix/include/mach-o
+	cp libunwind/include/*.h "$pkgdir"/$_prefix/include/
+	cp libunwind/include/mach-o/*.h "$pkgdir"/$_prefix/include/mach-o/
+}
+
+libunwind() {
+	pkgdesc="LLVM libunwind library"
+	depends="!libunwind-dev"
+
+	amove $_prefix/lib/libunwind.so.*
+}
+
+libunwind_static() {
+	pkgdesc="LLVM libunwind library (static)"
+
+	amove $_prefix/lib/libunwind.a
+}
+
+libunwind_dev() {
+	pkgdesc="LLVM libunwind library (development files)"
+
+	amove $_prefix/lib/libunwind.so
+	amove $_prefix/include
+}
+
+rt() {
+	pkgdesc="LLVM compiler-rt runtime libraries"
+	# prefix with 0.0 for easy migration to clang-rtlib when this ver no longer tracks default Clang
+	provides="clang$_llvmver-rtlib=0.0.$pkgver-r$pkgrel"
+
+	amove $_prefix/lib/clang/$_llvmver
+}
+
+libcxx() {
+	pkgdesc="LLVM libc++ library"
+
+	amove $_prefix/lib/libc++*.so.*
+}
+
+libcxx_static() {
+	pkgdesc="LLVM libc++ library (static libs)"
+
+	amove $_prefix/lib/libc++*.a
+}
+
+libcxx_dev() {
+	pkgdesc="LLVM libc++ library (development files)"
+
+	amove $_prefix/lib/libc++*.so
+	amove $_prefix/include/c++
+}
+
+_default_libcpp() {
+  mkdir -p "${subpkgdir}/usr/include/c++" "${subpkgdir}/usr/lib"
+  for i in libc++.so.1 libc++.so.1.0 libc++abi.so.1 libc++abi.so.1.0 libc++.a libc++abi.a libc++experimental.a; do
+    ln -sfv "llvm${_llvmver}/lib/${i}" "${subpkgdir}/usr/lib/${i}"
+  done
+  ln -sfv "../lib/llvm${_llvmver}/include/c++/v1" "${subpkgdir}/usr/include/c++/v1"
+}
+
+_default_unwind() {
+  mkdir -p "${subpkgdir}/usr/lib"
+  for i in libunwind.so.1 libunwind.so.1.0; do
+    ln -sfv "llvm${_llvmver}/lib/${i}" "${subpkgdir}/usr/lib/${i}"
+  done
+}
+
+sha512sums="
+89a67ebfbbc764cc456e8825ecfa90707741f8835b1b2adffae0b227ab1fe5ca9cce75b0efaffc9ca8431cae528dc54fd838867a56a2b645344d9e82d19ab1b7  llvm-project-${pkgver}.src.tar.xz
+5e7bbddbaea902e5ba5cd4db78bedbeef216f44fdd9b8f73efde6c09f40115c078649a109ffa61fefa0ee2f26655c038a48589ecac83068a47d60e9248c5dff1  armv6-arch.patch.noauto
+7c2cbd095b863f735842aaa8f0daecbf0282200fc58f1394139cee30d53c4a738757e38cbf0ec734398ee827e8a47314592bd7dc9768ef5c3664db682680e5a1  compiler-rt-lsan-dtp-offset.patch
+aaef886f71c5499da18ff18937404ab641cbc3a540ee9e4eed7ae6895970863e6d01ed598f8b2f1512936f33d6dd122cd7a00545afaf710a8026c729a3af720c  compiler-rt-ppc-fixes.patch
+2460aeeb2ddcc24686939e172189d5a05e78eb30a4dca03fd60f03ec3bab5d55223a5806e44305278da0c726e65411907a6074cf64697164e613f42c013e365e  compiler-rt-sanitizer-supported-arch.patch
+4295d104f3615d0ccae3f17e60a8e00c7df5b899fb790c746033f48e76c2b020e312639e03148d6162ce471a3c3b45461a5a82ac4eed407fafc670223656b572  fix-msan-with-musl.patch
+c7bd1a0acc06c9fbd8c73e7612d7d4e47fa2a547fbf03a5895ac68c756d7c2cc4fdd0d110545664ef8818db7edd61a7bb84712769a1eb137ffe86cf93c670feb  d97981c98a70ebeaa8901f34921b0a69a068ff5d.patch
+"

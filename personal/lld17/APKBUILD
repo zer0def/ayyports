@@ -1,0 +1,129 @@
+# Contributor: Eric Molitor <eric@molitor.org>
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgver=17.0.6
+_pkgver="${pkgver//_/-}"
+pkgrel=2
+# NOTE: Upgrade together with the whole LLVM suite.
+_llvmver=${pkgver%%.*}
+_pkgname=lld
+pkgname="${_pkgname}${_llvmver}"
+pkgdesc="The LLVM Linker"
+url="https://llvm.org/"
+arch="all"
+license="Apache-2.0"
+options="!tracedeps"
+depends_dev="$pkgname=$pkgver-r$pkgrel"
+#python2 available in alpine<3.16
+makedepends="
+	clang$_llvmver
+	cmake
+	compiler-rt$_llvmver
+	libedit-dev
+	libxml2-dev
+	llvm$_llvmver-dev
+	llvm$_llvmver-gtest
+	llvm$_llvmver-static
+	llvm$_llvmver-test-utils
+	llvm$_llvmver-libunwind-dev
+	patchelf
+	python3
+	samurai
+	scudo-malloc$_llvmver
+	zlib-dev
+	"
+checkdepends="gtest-dev bash llvm$_llvmver-test-utils"
+subpackages="$pkgname-dbg $pkgname-libs $pkgname-dev $pkgname-doc"
+#_default_lld="no"
+#[ "${_default_lld}" != "yes" ] || subpackages="${subpackages} ${_pkgname}-dev:_default_dev:noarch ${_pkgname}-libs:_default_libs:noarch"  # ${_pkgname}-doc:_default_doc:noarch
+subpackages="${subpackages} ${_pkgname}-dev:_default_dev:noarch ${_pkgname}-libs:_default_libs:noarch"  # ${_pkgname}-doc:_default_doc:noarch
+source="https://github.com/llvm/llvm-project/releases/download/llvmorg-${_pkgver}/llvm-project-${_pkgver}.src.tar.xz"
+_basedir="$srcdir/llvm-project-$_pkgver.src"
+builddir="$_basedir/lld"
+
+prepare() {
+	default_prepare
+	cd "${builddir}"
+
+	# package lit per llvm major
+	grep -nrE '(import|from)(\s*)lit(\.|\s|$)' test $(find -type f -iname 'lit.site.cfg.py.in') | \
+	awk -F: '{print $1}' | sort -u | xargs -r -- sed -i \
+		-e "s/\(from\s*\)lit\./\1lit${_llvmver}./g" \
+		-e "s/\(from\s*\)lit\(\s\)/\1lit${_llvmver}\2/g"
+	grep -nrE 'import(\s*)lit(\.|\s|$)' test $(find -type f -iname 'lit.site.cfg.py.in') | \
+	awk -F: '{print $1}' | sort -u | xargs -r -- sed -i \
+		-e "s/\(import\s*\)lit$/\1lit${_llvmver}/g" \
+		-e "s/\(import\s*\)lit\./\1lit${_llvmver}./g" \
+		-e "s/lit\./lit${_llvmver}./g"
+	ln -sfv lit.cfg.py "test/lit${_llvmver}.cfg.py"
+	sed -i "s/\(llvm-lit lit.py lit\)/lit${_llvmver} \1/" CMakeLists.txt
+}
+
+build() {
+	CFLAGS="${CFLAGS} -O2 -DNDEBUG -g1" \
+	CXXFLAGS="${CXXFLAGS} -O2 -DNDEBUG -g1" \
+	CC=clang-$_llvmver CXX=clang++-$_llvmver \
+	cmake --trace -B build -G Ninja -Wno-dev \
+		-DCMAKE_BUILD_TYPE=None \
+		-DCMAKE_INSTALL_PREFIX=/usr/lib/llvm$_llvmver \
+		-DCMAKE_SKIP_INSTALL_RPATH=ON \
+		-DBUILD_SHARED_LIBS=ON \
+		-DLLVM_INCLUDE_TESTS="$(want_check && echo ON || echo OFF)" \
+		-DLLVM_EXTERNAL_LIT=/usr/lib/llvm$_llvmver/bin/lit$_llvmver \
+		-DLLD_BUILT_STANDALONE=ON \
+		-DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS -Wl,-z,stack-size=2097152"
+	cmake --build build
+}
+
+check() {
+	ninja -v -C build check-lld ||:
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+	install -Dm644 docs/ld.lld.1 -t "$pkgdir"/usr/share/man/man1/
+
+	# we have the scudo allocator available, so link lld to it to
+	# significantly improve performance, especially in LTO contexts
+	patchelf --add-needed libscudo.so "${pkgdir}/usr/lib/llvm${_llvmver}/bin/lld"
+}
+
+libs() {
+	install -dm0755 "${subpkgdir}/usr/lib/llvm${_llvmver}/lib"
+	mv -v "${pkgdir}/usr/lib/llvm${_llvmver}/lib/lib"*.so.${_llvmver}* "${subpkgdir}/usr/lib/llvm${_llvmver}/lib"
+	rm -fv $(find "${pkgdir}/usr/lib/llvm${_llvmver}/lib/" -type l)
+	for i in $(ls -1 "${subpkgdir}/usr/lib/llvm${_llvmver}/lib/lib"*.so.${_llvmver}*); do
+		ln -sfv "llvm${_llvmver}/lib/${i##*/}" "${subpkgdir}/usr/lib/"
+	done
+}
+
+doc() {
+	default_doc
+}
+
+dev() {
+	mkdir -p "${subpkgdir}/usr/lib/llvm${_llvmver}/include" "${subpkgdir}/usr/lib/llvm${_llvmver}/lib" "${subpkgdir}/usr/include" "${subpkgdir}/usr/lib/cmake"
+	mv -v "${pkgdir}/usr/lib/llvm${_llvmver}/lib/cmake" "${subpkgdir}/usr/lib/llvm${_llvmver}/lib/cmake"
+	ln -sfv "../llvm${_llvmver}/lib/cmake/lld" "${subpkgdir}/usr/lib/cmake/lld${_llvmver}"
+
+	mv -v "${pkgdir}/usr/lib/llvm${_llvmver}/include/lld" "${subpkgdir}/usr/lib/llvm${_llvmver}/include/lld"
+	ln -sfv "../lib/llvm${_llvmver}/include/lld" "${subpkgdir}/usr/include/lld${_llvmver}"
+}
+
+_default_dev() {
+	mkdir -p "${subpkgdir}/usr/include" "${subpkgdir}/usr/lib/cmake"
+	ln -sfv "lld${_llvmver}" "${subpkgdir}/usr/include/lld"
+	ln -sfv "lld${_llvmver}" "${subpkgdir}/usr/lib/cmake/lld"
+}
+
+_default_libs() {
+	mkdir -p "${subpkgdir}/usr/lib"
+	for i in liblldCOFF.so liblldCommon.so liblldELF.so liblldMachO.so liblldMinGW.so liblldWasm.so; do
+		ln -sfv "${i}.${_llvmver}" "${subpkgdir}/usr/lib/${i}" ||:
+	done
+}
+
+sha512sums="
+6d85bf749e0d77553cc215cbfa61cec4ac4f4f652847f56f946b6a892a99a5ea40b6ab8b39a9708a035001f007986941ccf17e4635260a8b0c1fa59e78d41e30  llvm-project-${pkgver}.src.tar.xz
+"

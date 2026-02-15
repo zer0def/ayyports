@@ -1,0 +1,242 @@
+From e2090b340f49c3fe382fe9c26afcf7ba21b4abe2 Mon Sep 17 00:00:00 2001
+From: Chia-hung Duan <chiahungduan@google.com>
+Date: Wed, 4 Oct 2023 23:28:33 +0000
+Subject: [PATCH 1/3] [scudo] Fix the use of ASSERT_CAPABILITY in TSD
+
+In getCache()/getQuarantineCache(), they return a reference to variable
+guarded by a mutex. After #67776, thread-safey analysis checks if a
+variable return by reference has the lock held. The ASSERT_CAPABILITY
+only claims after calling that function, the lock will be held. But not
+asserting that the lock is held *before* calling that function.
+
+In the patch, we switch to use REQUIRES() and assertLocked() to mark the
+code paths. Also remove the misused ASSERT_CAPABILITY.
+---
+ compiler-rt/lib/scudo/standalone/combined.h       |  5 +++++
+ .../lib/scudo/standalone/tests/combined_test.cpp  |  3 +++
+ .../lib/scudo/standalone/tests/tsd_test.cpp       |  4 ++++
+ compiler-rt/lib/scudo/standalone/tsd.h            | 15 +++++++++++----
+ compiler-rt/lib/scudo/standalone/tsd_shared.h     |  5 +++++
+ 5 files changed, 28 insertions(+), 4 deletions(-)
+
+diff --git a/compiler-rt/lib/scudo/standalone/combined.h b/compiler-rt/lib/scudo/standalone/combined.h
+index e4ba6ee7886f2..b013f03a73ae4 100644
+--- a/compiler-rt/lib/scudo/standalone/combined.h
++++ b/compiler-rt/lib/scudo/standalone/combined.h
+@@ -245,12 +245,14 @@ class Allocator {
+   // - unlinking the local stats from the global ones (destroying the cache does
+   //   the last two items).
+   void commitBack(TSD<ThisT> *TSD) {
++    TSD->assertLocked(/*BypassCheck=*/true);
+     Quarantine.drain(&TSD->getQuarantineCache(),
+                      QuarantineCallback(*this, TSD->getCache()));
+     TSD->getCache().destroy(&Stats);
+   }
+ 
+   void drainCache(TSD<ThisT> *TSD) {
++    TSD->assertLocked(/*BypassCheck=*/true);
+     Quarantine.drainAndRecycle(&TSD->getQuarantineCache(),
+                                QuarantineCallback(*this, TSD->getCache()));
+     TSD->getCache().drain();
+@@ -363,6 +365,7 @@ class Allocator {
+       DCHECK_NE(ClassId, 0U);
+       bool UnlockRequired;
+       auto *TSD = TSDRegistry.getTSDAndLock(&UnlockRequired);
++      TSD->assertLocked(/*BypassCheck=*/!UnlockRequired);
+       Block = TSD->getCache().allocate(ClassId);
+       // If the allocation failed, the most likely reason with a 32-bit primary
+       // is the region being full. In that event, retry in each successively
+@@ -1147,6 +1150,7 @@ class Allocator {
+       if (LIKELY(ClassId)) {
+         bool UnlockRequired;
+         auto *TSD = TSDRegistry.getTSDAndLock(&UnlockRequired);
++        TSD->assertLocked(/*BypassCheck=*/!UnlockRequired);
+         const bool CacheDrained =
+             TSD->getCache().deallocate(ClassId, BlockBegin);
+         if (UnlockRequired)
+@@ -1166,6 +1170,7 @@ class Allocator {
+     } else {
+       bool UnlockRequired;
+       auto *TSD = TSDRegistry.getTSDAndLock(&UnlockRequired);
++      TSD->assertLocked(/*BypassCheck=*/!UnlockRequired);
+       Quarantine.put(&TSD->getQuarantineCache(),
+                      QuarantineCallback(*this, TSD->getCache()), Ptr, Size);
+       if (UnlockRequired)
+diff --git a/compiler-rt/lib/scudo/standalone/tests/combined_test.cpp b/compiler-rt/lib/scudo/standalone/tests/combined_test.cpp
+index 1143aaab8371d..7958e9dabf60d 100644
+--- a/compiler-rt/lib/scudo/standalone/tests/combined_test.cpp
++++ b/compiler-rt/lib/scudo/standalone/tests/combined_test.cpp
+@@ -512,6 +512,7 @@ SCUDO_TYPED_TEST(ScudoCombinedTest, CacheDrain) NO_THREAD_SAFETY_ANALYSIS {
+ 
+   bool UnlockRequired;
+   auto *TSD = Allocator->getTSDRegistry()->getTSDAndLock(&UnlockRequired);
++  TSD->assertLocked(/*BypassCheck=*/!UnlockRequired);
+   EXPECT_TRUE(!TSD->getCache().isEmpty());
+   TSD->getCache().drain();
+   EXPECT_TRUE(TSD->getCache().isEmpty());
+@@ -536,6 +537,7 @@ SCUDO_TYPED_TEST(ScudoCombinedTest, ForceCacheDrain) NO_THREAD_SAFETY_ANALYSIS {
+ 
+   bool UnlockRequired;
+   auto *TSD = Allocator->getTSDRegistry()->getTSDAndLock(&UnlockRequired);
++  TSD->assertLocked(/*BypassCheck=*/!UnlockRequired);
+   EXPECT_TRUE(TSD->getCache().isEmpty());
+   EXPECT_EQ(TSD->getQuarantineCache().getSize(), 0U);
+   EXPECT_TRUE(Allocator->getQuarantine()->isEmpty());
+@@ -842,6 +844,7 @@ TEST(ScudoCombinedTest, BasicTrustyConfig) {
+ 
+   bool UnlockRequired;
+   auto *TSD = Allocator->getTSDRegistry()->getTSDAndLock(&UnlockRequired);
++  TSD->assertLocked(/*BypassCheck=*/!UnlockRequired);
+   TSD->getCache().drain();
+ 
+   Allocator->releaseToOS(scudo::ReleaseToOS::Force);
+diff --git a/compiler-rt/lib/scudo/standalone/tests/tsd_test.cpp b/compiler-rt/lib/scudo/standalone/tests/tsd_test.cpp
+index 5953d759a69a9..fad8fcf900771 100644
+--- a/compiler-rt/lib/scudo/standalone/tests/tsd_test.cpp
++++ b/compiler-rt/lib/scudo/standalone/tests/tsd_test.cpp
+@@ -101,6 +101,7 @@ template <class AllocatorT> static void testRegistry() {
+ 
+   bool UnlockRequired;
+   auto TSD = Registry->getTSDAndLock(&UnlockRequired);
++  TSD->assertLocked(/*BypassCheck=*/!UnlockRequired);
+   EXPECT_NE(TSD, nullptr);
+   EXPECT_EQ(TSD->getCache().Canary, 0U);
+   if (UnlockRequired)
+@@ -108,6 +109,7 @@ template <class AllocatorT> static void testRegistry() {
+ 
+   Registry->initThreadMaybe(Allocator.get(), /*MinimalInit=*/false);
+   TSD = Registry->getTSDAndLock(&UnlockRequired);
++  TSD->assertLocked(/*BypassCheck=*/!UnlockRequired);
+   EXPECT_NE(TSD, nullptr);
+   EXPECT_EQ(TSD->getCache().Canary, 0U);
+   memset(&TSD->getCache(), 0x42, sizeof(TSD->getCache()));
+@@ -137,6 +139,7 @@ template <typename AllocatorT> static void stressCache(AllocatorT *Allocator) {
+   Registry->initThreadMaybe(Allocator, /*MinimalInit=*/false);
+   bool UnlockRequired;
+   auto TSD = Registry->getTSDAndLock(&UnlockRequired);
++  TSD->assertLocked(/*BypassCheck=*/!UnlockRequired);
+   EXPECT_NE(TSD, nullptr);
+   // For an exclusive TSD, the cache should be empty. We cannot guarantee the
+   // same for a shared TSD.
+@@ -195,6 +198,7 @@ static void stressSharedRegistry(MockAllocator<SharedCaches> *Allocator) {
+   bool UnlockRequired;
+   for (scudo::uptr I = 0; I < 4096U; I++) {
+     auto TSD = Registry->getTSDAndLock(&UnlockRequired);
++    TSD->assertLocked(/*BypassCheck=*/!UnlockRequired);
+     EXPECT_NE(TSD, nullptr);
+     Set.insert(reinterpret_cast<void *>(TSD));
+     if (UnlockRequired)
+diff --git a/compiler-rt/lib/scudo/standalone/tsd.h b/compiler-rt/lib/scudo/standalone/tsd.h
+index f4fa545de5e04..5eb1bc0cc07ec 100644
+--- a/compiler-rt/lib/scudo/standalone/tsd.h
++++ b/compiler-rt/lib/scudo/standalone/tsd.h
+@@ -53,10 +53,18 @@ template <class Allocator> struct alignas(SCUDO_CACHE_LINE_SIZE) TSD {
+   inline void unlock() NO_THREAD_SAFETY_ANALYSIS { Mutex.unlock(); }
+   inline uptr getPrecedence() { return atomic_load_relaxed(&Precedence); }
+ 
+-  void commitBack(Allocator *Instance) ASSERT_CAPABILITY(Mutex) {
++  void commitBack(Allocator *Instance) {
+     Instance->commitBack(this);
+   }
+ 
++  // As the comments attached to `getCache()`, the TSD doesn't always need to be
++  // locked. In that case, we would only skip the check before we have all TSDs
++  // locked in all paths.
++  void assertLocked(bool BypassCheck) ASSERT_CAPABILITY(Mutex) {
++    if (SCUDO_DEBUG && !BypassCheck)
++      Mutex.assertHeld();
++  }
++
+   // Ideally, we may want to assert that all the operations on
+   // Cache/QuarantineCache always have the `Mutex` acquired. However, the
+   // current architecture of accessing TSD is not easy to cooperate with the
+@@ -66,11 +74,10 @@ template <class Allocator> struct alignas(SCUDO_CACHE_LINE_SIZE) TSD {
+   // TODO(chiahungduan): Ideally, we want to do `Mutex.assertHeld` but acquiring
+   // TSD doesn't always require holding the lock. Add this assertion while the
+   // lock is always acquired.
+-  typename Allocator::CacheT &getCache() ASSERT_CAPABILITY(Mutex) {
++  typename Allocator::CacheT &getCache() REQUIRES(Mutex) {
+     return Cache;
+   }
+-  typename Allocator::QuarantineCacheT &getQuarantineCache()
+-      ASSERT_CAPABILITY(Mutex) {
++  typename Allocator::QuarantineCacheT &getQuarantineCache() REQUIRES(Mutex) {
+     return QuarantineCache;
+   }
+ 
+diff --git a/compiler-rt/lib/scudo/standalone/tsd_shared.h b/compiler-rt/lib/scudo/standalone/tsd_shared.h
+index dcb0948ad78fa..80b13eeffc800 100644
+--- a/compiler-rt/lib/scudo/standalone/tsd_shared.h
++++ b/compiler-rt/lib/scudo/standalone/tsd_shared.h
+@@ -120,6 +120,11 @@ struct TSDRegistrySharedT {
+                 TSDsArraySize);
+     for (uptr I = 0; I < NumberOfTSDs; ++I) {
+       TSDs[I].lock();
++      // Theoratically, we want to mark TSD::lock()/TSD::unlock() with proper
++      // thread annotations. However, given the TSD is only locked on shared
++      // path, do the assertion in a separate path to avoid confusing the
++      // analyzer.
++      TSDs[I].assertLocked(/*BypassCheck=*/true);
+       Str->append("  Shared TSD[%zu]:\n", I);
+       TSDs[I].getCache().getStats(Str);
+       TSDs[I].unlock();
+
+From 9df9199c45271e46c17e36a4090e04f4e2974a7a Mon Sep 17 00:00:00 2001
+From: Chia-hung Duan <chiahungduan@google.com>
+Date: Wed, 4 Oct 2023 23:51:16 +0000
+Subject: [PATCH 2/3] fixup! [scudo] Fix the use of ASSERT_CAPABILITY in TSD
+
+---
+ compiler-rt/lib/scudo/standalone/tsd.h | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/compiler-rt/lib/scudo/standalone/tsd.h b/compiler-rt/lib/scudo/standalone/tsd.h
+index 5eb1bc0cc07ec..b2108a01900bc 100644
+--- a/compiler-rt/lib/scudo/standalone/tsd.h
++++ b/compiler-rt/lib/scudo/standalone/tsd.h
+@@ -53,9 +53,7 @@ template <class Allocator> struct alignas(SCUDO_CACHE_LINE_SIZE) TSD {
+   inline void unlock() NO_THREAD_SAFETY_ANALYSIS { Mutex.unlock(); }
+   inline uptr getPrecedence() { return atomic_load_relaxed(&Precedence); }
+ 
+-  void commitBack(Allocator *Instance) {
+-    Instance->commitBack(this);
+-  }
++  void commitBack(Allocator *Instance) { Instance->commitBack(this); }
+ 
+   // As the comments attached to `getCache()`, the TSD doesn't always need to be
+   // locked. In that case, we would only skip the check before we have all TSDs
+@@ -74,9 +72,7 @@ template <class Allocator> struct alignas(SCUDO_CACHE_LINE_SIZE) TSD {
+   // TODO(chiahungduan): Ideally, we want to do `Mutex.assertHeld` but acquiring
+   // TSD doesn't always require holding the lock. Add this assertion while the
+   // lock is always acquired.
+-  typename Allocator::CacheT &getCache() REQUIRES(Mutex) {
+-    return Cache;
+-  }
++  typename Allocator::CacheT &getCache() REQUIRES(Mutex) { return Cache; }
+   typename Allocator::QuarantineCacheT &getQuarantineCache() REQUIRES(Mutex) {
+     return QuarantineCache;
+   }
+
+From d9638049be15cd9070341374e362921769e14f01 Mon Sep 17 00:00:00 2001
+From: Chia-hung Duan <chiahungduan@google.com>
+Date: Thu, 5 Oct 2023 18:22:39 +0000
+Subject: [PATCH 3/3] fixup! fixup! [scudo] Fix the use of ASSERT_CAPABILITY in
+ TSD
+
+---
+ compiler-rt/lib/scudo/standalone/tsd_shared.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/compiler-rt/lib/scudo/standalone/tsd_shared.h b/compiler-rt/lib/scudo/standalone/tsd_shared.h
+index 80b13eeffc800..1bca578ee14be 100644
+--- a/compiler-rt/lib/scudo/standalone/tsd_shared.h
++++ b/compiler-rt/lib/scudo/standalone/tsd_shared.h
+@@ -120,7 +120,7 @@ struct TSDRegistrySharedT {
+                 TSDsArraySize);
+     for (uptr I = 0; I < NumberOfTSDs; ++I) {
+       TSDs[I].lock();
+-      // Theoratically, we want to mark TSD::lock()/TSD::unlock() with proper
++      // Theoretically, we want to mark TSD::lock()/TSD::unlock() with proper
+       // thread annotations. However, given the TSD is only locked on shared
+       // path, do the assertion in a separate path to avoid confusing the
+       // analyzer.
