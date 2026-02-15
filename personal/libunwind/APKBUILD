@@ -1,0 +1,69 @@
+# Contributor: Ben Pye <ben@curlybracket.co.uk>
+maintainer="Krassy Boykinov <kboykinov@teamcentrixx.com>"
+pkgname=libunwind
+pkgver=1.8.3
+pkgrel=0
+pkgdesc="Portable and efficient C programming interface (API) to determine the call-chain of a program"
+url="https://www.nongnu.org/libunwind/"
+arch="all"
+license="MIT"
+depends_dev="libucontext-dev"
+makedepends_build="autoconf automake libtool"
+makedepends_host="$depends_dev linux-headers xz-dev"
+makedepends="$makedepends_build $makedepends_host"
+subpackages="$pkgname-dbg $pkgname-static $pkgname-dev"  #$pkgname-doc
+source="https://github.com/libunwind/libunwind/releases/download/v$pkgver/libunwind-$pkgver.tar.gz
+	force-enable-man.patch
+	fix-libunwind-pc-in.patch
+	Remove-the-useless-endina.h-for-loongarch64.patch
+	gcc15.patch::https://github.com/libunwind/libunwind/commit/b67d508a93bf1ba231c18dce3894cfee25c16e0d.patch
+	001-musl-support.patch.noauto::https://github.com/libunwind/libunwind/commit/75fe438e4adaa1666b39c4b08e22c1eb947b6986.patch
+	002-musl-tests.patch.noauto::https://github.com/libunwind/libunwind/commit/3e72728f4f3219a5c1e05dcc5ccebd213744ff44.patch
+	004-musl-aarch64-setjmp.patch.noauto::https://github.com/libunwind/libunwind/commit/bf6ee1169a19be73a415578db6030e117d71ef52.patch
+	005-musl-ppc32.patch.noauto::https://github.com/libunwind/libunwind/commit/71559717599cecc4d1ccb2061766ec5c12e10ac6.patch
+	"
+
+prepare() {
+	sed -i 's/-WCClinker//g' "${srcdir}/libunwind-${pkgver}/configure.ac"
+	autoreconf -fvi
+}
+
+build() {
+	# disable-minidebuginfo to avoid lzma_* function stubs causing issues with static linking
+	# it's possible that we might be even interested in `-lunwind-$(arch) -llzma -lunwind` per other CMake-based projects
+	# ref: https://github.com/libunwind/libunwind/issues/250 https://github.com/libunwind/libunwind/issues/586
+
+	# shellcheck disable=2046
+	LDFLAGS="$LDFLAGS -lucontext" CFLAGS="$CFLAGS -fno-stack-protector" \
+	./configure \
+		--build="$CBUILD" \
+		--host="$CHOST" \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var \
+		--enable-cxx-exceptions \
+		--disable-minidebuginfo \
+		$(want_check || echo --disable-tests)
+	make
+}
+
+check() {
+	make check||:  # v1.4.0 12 tests failing - https://github.com/libunwind/libunwind/issues/164
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+732c9b74635cf4e65bc90fd5b9a4b90fe5968c7fcce6cc704295038f0d41b848f78a59d725e813072e78df72ff8fc77001096abdfb9ef1c73e3bd82433987679  libunwind-1.8.3.tar.gz
+8f33904e5b0a9bb1f41be96537c78f3752b30d4a3316bcad50da470b5a780dbd9f8d902285729176320f21cb11b497bfc1b788de990d860106052ed08d484c09  force-enable-man.patch
+ab5d44e9d3aaf32e3119fe79389e5dfcdc859c78cfda8400e54ee29fd1cdf04b99e2686caf18ab0b76ac94f861861d69a5cf740d46967af9c630095485523f1c  fix-libunwind-pc-in.patch
+db8ab626920fa7fea5f0ff17e92909f0b293804eca61425dff53dd79a0f92b4db80941850fa144cfc9ecd2e1537b26fa8d62c56824ffea8e2790ed3930c8ff96  Remove-the-useless-endina.h-for-loongarch64.patch
+1d117ac31e1aa3610c6499c531a7b8bf0b82ce493c8f0c723336006d861b0b76645169b102f330a203f3a208a55212addacec1a98591efcb8965367801174cd0  gcc15.patch
+b9ff0a26b8aef8fe386a428171c5b4f6a2d06edabea5b0b41d72420715981890f69c085f8f9508d88083fcf83dd86ed1f7ac45f47ee8e2d9c720a0a98df437bb  001-musl-support.patch.noauto
+4d3225987fe8b44c3a79c569b32891e8221290350c43e18cd54cba78037d1437b46bf3065724f514d027005ff68a8c1d9c2db81d19599ed73a7f7fe2fefc9b71  002-musl-tests.patch.noauto
+c34390aced5cdd2faf248aa864d426e5c21ea40af96714012d756b5570dbb6b653eb473f510ce96b1925287f546442c2e3a78b72f50265b96eb4843ef07b97df  004-musl-aarch64-setjmp.patch.noauto
+088c73e855e81237b5966bb4b6692e16248c1975fa6abd85e8a88e87d53901c577f90fb606686e6eda6398100a78ac0b2ef45b41f88760615e4b8fe7fef471ad  005-musl-ppc32.patch.noauto
+"

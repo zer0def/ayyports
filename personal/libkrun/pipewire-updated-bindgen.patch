@@ -1,0 +1,22 @@
+--- a/src/devices/Cargo.toml
++++ b/src/devices/Cargo.toml
+@@ -26,7 +26,7 @@
+ libloading = "0.8"
+ log = "0.4.0"
+ nix = { version = "0.30.1", features = ["ioctl", "net", "poll", "socket", "fs"] }
+-pw = { package = "pipewire", version = "0.8.0", optional = true }
++pw = { package = "pipewire", git = "https://github.com/zer0def/pipewire-rs.git", rev = "715b0db2d767dbc19fb2082eb09f54cfa9d10009", optional = true }
+ rand = "0.9.2"
+ thiserror = { version = "2.0", optional = true }
+ virtio-bindings = "0.2.0"
+--- a/src/krun_display/Cargo.toml
++++ b/src/krun_display/Cargo.toml
+@@ -11,7 +11,7 @@
+ static_assertions = "1.1.0"
+ 
+ [build-dependencies]
+-bindgen = { version = "0.72", default-features = false }
++bindgen = { version = "0.72.1", default-features = false }
+ 
+ [features]
+ bindgen_clang_runtime = ["bindgen/runtime"]

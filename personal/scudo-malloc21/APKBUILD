@@ -1,0 +1,83 @@
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgver=21.1.8
+pkgrel=1
+_pkgname=scudo-malloc
+pkgname="${_pkgname}${pkgver%%.*}"
+# NOTE: Upgrade together with the whole LLVM suite.
+pkgdesc="Standalone scudo malloc from compiler-rt"
+url="https://llvm.org"
+arch="all"
+license="Apache-2.0 WITH LLVM-exception"
+provider_priority=100  # highest
+options="!check"
+depends_dev="$pkgname=$pkgver-r$pkgrel"
+makedepends="linux-headers"
+checkdepends="gtest-dev"
+subpackages="$pkgname-static $pkgname-dev"
+#_default_scudo="no"
+#[ "${_default_scudo}" != "yes" ] || subpackages="${subpackages} ${_pkgname}:_default_pkg:noarch"
+subpackages="${subpackages} ${_pkgname}:_default_pkg:noarch"
+source="https://github.com/llvm/llvm-project/releases/download/llvmorg-${pkgver}/llvm-project-${pkgver}.src.tar.xz
+	0001-Add-makefile.patch
+	"
+_basedir="$srcdir/llvm-project-${pkgver}.src"
+builddir="$_basedir/compiler-rt/lib/scudo/standalone"
+
+case "$CARCH" in
+ppc64le)
+	# tests/common_test.cpp:33: Failure
+	# Expected: (OnStart) > (0UL), actual: 0 vs 0
+	# https://gitlab.alpinelinux.org/alpine/aports/-/issues/16235
+	options="!check"
+	;;
+esac
+
+build() {
+	local cflags_crc32=
+	unset CXXFLAGS
+	case "$CARCH" in
+		aarch64)
+			# this has broken emulation in aarch64 qemu (incl qemu-user),
+			# which causes it to abort instantly
+			CXXFLAGS="-DSCUDO_DISABLE_TBI"
+			cflags_crc32="-march=armv8-a+crc"
+			;;
+		x86*)	cflags_crc32="-mcrc32"
+			;;
+	esac
+
+	msg "building libscudo"
+	make --trace CXXFLAGS="$CXXFLAGS" CXXFLAGS_crc32="$cflags_crc32" TESTS="$(want_check && echo yes || echo no)"
+}
+
+check() {
+	make --trace test
+}
+
+package() {
+	install -Dm755 "${builddir}/libscudo.so" "${pkgdir}/usr/lib/libscudo.so.${pkgver}"
+	ln -s "libscudo.so.${pkgver}"    "${pkgdir}/usr/lib/libscudo.so.${pkgver%.*}"
+	ln -s "libscudo.so.${pkgver%.*}" "${pkgdir}/usr/lib/libscudo.so.${pkgver%%.*}"
+}
+
+dev() {
+	install -Dm644 "${builddir}/include/scudo/interface.h" -t "${subpkgdir}/usr/include/scudo${pkgver%%.*}/"
+}
+
+static() {
+	install -Dm644 "${builddir}/libscudo.a"  "${subpkgdir}/usr/lib/libscudo.a.${pkgver}"
+	ln -s "libscudo.a.${pkgver}"     "${subpkgdir}/usr/lib/libscudo.a.${pkgver%.*}"
+	ln -s "libscudo.a.${pkgver%.*}"  "${subpkgdir}/usr/lib/libscudo.a.${pkgver%%.*}"
+}
+
+_default_pkg() {
+	mkdir -p "${subpkgdir}/usr/include" "${subpkgdir}/usr/lib"
+	ln -s "libscudo.so.${pkgver%%.*}"   "${subpkgdir}/usr/lib/libscudo.so"
+	ln -s "libscudo.a.${pkgver%%.*}"    "${subpkgdir}/usr/lib/libscudo.a"
+	ln -s "scudo${pkgver%%.*}"          "${subpkgdir}/usr/include/scudo"
+}
+
+sha512sums="
+cae4c44e7bf678071723da63ad5839491d717a7233e7f4791aa408207f3ea42f52de939ad15189b112c02a0770f1bb8d59bae6ad31ef53417a6eea7770fe52ab  llvm-project-${pkgver}.src.tar.xz
+1102a512adde2ef31aafa6011a4293d5fa361aa920f88ac20599aab84711e973315e6f6719631be11007aea869ae700e34ed57c7dc7724e8aacbc5b493632849  0001-Add-makefile.patch
+"
