@@ -1,0 +1,75 @@
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+# tied to llvm version
+pkgver=16.0.6
+pkgrel=1
+_pkgname=scudo-malloc
+pkgname="${_pkgname}${pkgver%%.*}"
+pkgdesc="Standalone scudo malloc from compiler-rt"
+url="https://llvm.org"
+arch="all"
+license="Apache-2.0 WITH LLVM-exception"
+options="!check"
+depends_dev="$pkgname=$pkgver-r$pkgrel"
+makedepends="linux-headers"
+checkdepends="gtest-dev"
+subpackages="$pkgname-static $pkgname-dev"
+#_default_scudo="no"
+#[ "${_default_scudo}" != "yes" ] || subpackages="${subpackages} ${_pkgname}:_default_pkg:noarch"
+subpackages="${subpackages} ${_pkgname}:_default_pkg:noarch"
+source="https://github.com/llvm/llvm-project/releases/download/llvmorg-${pkgver}/llvm-project-${pkgver}.src.tar.xz
+	0001-Add-makefile.patch
+	0001-scudo-Detach-the-hooks-from-Scudo-s-internal-impleme.patch
+	"
+_basedir="$srcdir/llvm-project-${pkgver}.src"
+builddir="$_basedir/compiler-rt/lib/scudo/standalone"
+
+build() {
+	local cflags_crc32=
+	unset CXXFLAGS
+	case "$CARCH" in
+		aarch64)
+			# this has broken emulation in aarch64 qemu (incl qemu-user),
+			# which causes it to abort instantly
+			CXXFLAGS="-DSCUDO_DISABLE_TBI"
+			cflags_crc32="-march=armv8-a+crc"
+			;;
+		x86*)	cflags_crc32="-mcrc32"
+			;;
+	esac
+
+	msg "building libscudo"
+	make --trace CXXFLAGS="$CXXFLAGS" CXXFLAGS_crc32="$cflags_crc32" TESTS="$(want_check && echo yes || echo no)"
+}
+
+check() {
+	make --trace test
+}
+
+package() {
+	install -Dm755 "${builddir}/libscudo.so" "${pkgdir}/usr/lib/libscudo.so.${pkgver}"
+	ln -s "libscudo.so.${pkgver}"    "${pkgdir}/usr/lib/libscudo.so.${pkgver%.*}"
+	ln -s "libscudo.so.${pkgver%.*}" "${pkgdir}/usr/lib/libscudo.so.${pkgver%%.*}"
+}
+
+dev() {
+	install -Dm644 "${builddir}/include/scudo/interface.h" -t "${subpkgdir}/usr/include/scudo${pkgver%%.*}/"
+}
+
+static() {
+	install -Dm644 "${builddir}/libscudo.a"  "${subpkgdir}/usr/lib/libscudo.a.${pkgver}"
+	ln -s "libscudo.a.${pkgver}"     "${subpkgdir}/usr/lib/libscudo.a.${pkgver%.*}"
+	ln -s "libscudo.a.${pkgver%.*}"  "${subpkgdir}/usr/lib/libscudo.a.${pkgver%%.*}"
+}
+
+_default_pkg() {
+	mkdir -p "${subpkgdir}/usr/include" "${subpkgdir}/usr/lib"
+	ln -s "libscudo.so.${pkgver%%.*}"   "${subpkgdir}/usr/lib/libscudo.so"
+	ln -s "libscudo.a.${pkgver%%.*}"    "${subpkgdir}/usr/lib/libscudo.a"
+	ln -s "scudo${pkgver%%.*}"          "${subpkgdir}/usr/include/scudo"
+}
+
+sha512sums="
+89a67ebfbbc764cc456e8825ecfa90707741f8835b1b2adffae0b227ab1fe5ca9cce75b0efaffc9ca8431cae528dc54fd838867a56a2b645344d9e82d19ab1b7  llvm-project-${pkgver}.src.tar.xz
+1102a512adde2ef31aafa6011a4293d5fa361aa920f88ac20599aab84711e973315e6f6719631be11007aea869ae700e34ed57c7dc7724e8aacbc5b493632849  0001-Add-makefile.patch
+063a6d906069acbaaed9a8a2fb107f31f28911a25b1a72b3170ecbcf26b263b9cce45e4b84beb9fc946a091af6777c0ded8c7e347fa00161bf9966c0b0b9f90a  0001-scudo-Detach-the-hooks-from-Scudo-s-internal-impleme.patch
+"

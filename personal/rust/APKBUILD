@@ -1,0 +1,818 @@
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Contributor: Shiz <hi@shiz.me>
+# Contributor: Jeizsm <jeizsm@gmail.com>
+# Contributor: Ariadne Conill <ariadne@dereferenced.org>
+# Contributor: Celeste <cielesti@protonmail.com>
+# Contributor: omni <omni+alpine@hack.org>
+# Maintainer: team/rust <alpine@ptrcnull.me>
+pkgname=rust
+pkgver=1.97.1
+_mrustc_ver="0.11.2"
+#_mrustc_ver="0.12.0"  # 0df0ad41e646b25664459c92419b88881b139967d36d0601d799d282afb063cb36a73c5476b796d6935e6d886a4709d8efe6442b496c27accf149d7b7b39af42
+pkgrel=0
+# Source tarballs for beta releases are listed here:
+# https://static.rust-lang.org/dist/channel-rust-beta.toml
+pkgdesc="Rust Programming Language toolchain"
+url="https://www.rust-lang.org/"
+arch="all"
+license="Apache-2.0 OR MIT"
+
+# 'cc' is needed at runtime just for linking. Someday rustc might invoke
+# the linker directly, and then we'll only need 'ld'.
+# See: https://github.com/rust-lang/rust/issues/11937
+depends="gcc musl-dev"
+checkdepends="libunwind-static"
+
+# * Rust is self-hosted, so you need rustc (and cargo) to build rustc...
+#   The last revision of this abuild that does not depend on itself (uses
+#   prebuilt rustc and cargo) is 2e6769eb39eaff3029d8298fc02856623c563cd8.
+# * Don't add libgit2-dev into make dependencies. There's no compatibility
+#   guarantees between libgit2-sys and arbitrary system libgit2 versions;
+#   when system libgit2 is upgraded to a new minor version, it may break
+#   cargo and since we need cargo to rebuild cargo... this already happened
+#   several times. For this reason we build cargo with vendored libgit2.
+
+# technically we only need the target rust version's compiler-rt major, but add all anyway
+makedepends_host="
+	!libgit2-dev
+	curl-dev
+	libssh2-dev
+	compiler-rt17 compiler-rt18 compiler-rt19 compiler-rt20 compiler-rt21
+	llvm17-dev llvm18-dev llvm19-dev llvm20-dev llvm21-dev
+	openssl-dev
+	sqlite-dev
+	zlib-dev
+	"
+makedepends_build="
+	${makedepends_host}
+	clang17 clang18 clang19 clang20 clang21
+	file
+	llvm17-test-utils llvm18-test-utils llvm19-test-utils llvm20-test-utils llvm21-test-utils
+	python3
+	tar
+	xz-dev
+	"
+
+# XXX: This is a hack to allow this abuild to depend on itself. Adding "rust"
+# to makedepends would not work, because abuild implicitly removes ${pkgname}
+# and ${subpackages} from the abuild's dependencies.
+provides="rust-bootstrap=${pkgver}-r${pkgrel}"
+# !archcheck: needed for -src that contains some testing binaries.
+# net: crates from crate.io
+options="!archcheck net"
+
+# Only cargo is needed for bootstrapping.
+subpackages="
+	cargo:_cargo
+	${pkgname}-dbg
+	${pkgname}-doc
+	${pkgname}-clippy
+	${pkgname}-clippy-doc:_clippy_doc
+	${pkgname}-gdb::noarch
+	${pkgname}-lldb::noarch
+	${pkgname}-src::noarch
+	${pkgname}-wasm
+	cargo-bash-completions:_cargo_bashcomp:noarch
+	cargo-zsh-completion:_cargo_zshcomp:noarch
+	cargo-doc:_cargo_doc:noarch
+	rustc-dev:_rustc_dev
+	rustfmt
+	rustfmt-doc:_rustfmt_doc
+	wasm-component-ld:_wasm_cmld
+	wasm-component-ld-dbg:_wasm_cmld_dbg
+	"
+case "${CHOST}" in
+	aarch64*|x86_64*)
+	subpackages="${subpackages} ${pkgname}-uefi"
+	;;
+esac
+makedepends_build="
+	${makedepends_build}
+	wasi-libc
+	patchelf
+	"
+makedepends_host="
+	${makedepends_host}
+	scudo-malloc17 scudo-malloc18 scudo-malloc19 scudo-malloc20 scudo-malloc21 scudo-malloc~21
+	"
+#source="https://github.com/thepowersgang/mrustc/archive/v${_mrustc_ver}.tar.gz  # by ← repository state or by release ↓?
+source="https://github.com/thepowersgang/mrustc/archive/refs/tags/v${_mrustc_ver}.tar.gz
+	https://github.com/thepowersgang/mrustc/commit/56e4d7a37155526497354a9a1e500ff9dc8a423d.patch
+	musl-dylib.patch Cargo.toml
+
+	rustc-1.74.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.74.0-src.tar.xz
+	rustc-1.75.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.75.0-src.tar.xz
+	rustc-1.76.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.76.0-src.tar.xz
+	rustc-1.77.2-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.77.2-src.tar.xz
+	rustc-1.78.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.78.0-src.tar.xz
+	rustc-1.79.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.79.0-src.tar.xz
+	rustc-1.80.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.80.1-src.tar.xz
+	rustc-1.81.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.81.0-src.tar.xz
+	rustc-1.82.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.82.0-src.tar.xz
+	rustc-1.83.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.83.0-src.tar.xz
+	rustc-1.84.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.84.1-src.tar.xz
+	rustc-1.85.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.85.1-src.tar.xz
+	rustc-1.86.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.86.0-src.tar.xz
+	rustc-1.87.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.87.0-src.tar.xz
+	rustc-1.88.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.88.0-src.tar.xz
+	rustc-1.89.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.89.0-src.tar.xz
+	rustc-1.90.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.90.0-src.tar.xz
+	rustc-1.91.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.91.1-src.tar.xz
+	rustc-1.92.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.92.0-src.tar.xz
+	rustc-1.93.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.93.1-src.tar.xz
+	rustc-1.94.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.94.1-src.tar.xz
+	rustc-1.95.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.95.0-src.tar.xz
+	rustc-1.96.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.96.1-src.tar.xz
+	rustc-1.97.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.97.1-src.tar.xz
+
+	alpine-move-py-scripts-to-share.patch
+	do-not-install-libunwind-source.patch
+	embed-metadata.patch
+	gcc-eh-libunwind.patch
+	install-template-shebang.patch
+	no-export-ld-library-path.patch
+	remove-musl-root.patch
+	check-rustc
+	"
+#builddir="${srcdir}/rustc-${pkgver}-src"
+_rust_llvm="1.74:17;1.75:17;1.76:17;1.77:18;1.78:18;1.79:18;1.80:18;1.81:18;1.82:19;1.83:19;1.84:19;1.85:19;1.86:20;1.87:20;1.88:21;1.89:21;1.90:21;1.91:21;1.92:21;1.93:21;1.94:21;1.95:21;1.96:21;1.97:21"  # >=1.88:21
+_rust_changeid="1.74.0:0 1.75.0:116881 1.76.0:118703 1.77.2:118703 1.78.0:121754 1.79.0:123711 1.80.1:123711 1.81.0:127866 1.82.0:129295 1.83.0:131075 1.84.1:131075 1.85.1:134650 1.86.0:136941 1.87.0:138986 1.88.0:140732 1.89.0:142379 1.90.0:144675 1.91.1:146435 1.92.0:147888 1.93.1:148911 1.94.1:149354 1.95.0:149354 1.96.1:154508 1.97.1:154587"
+
+# secfixes:
+#   1.96.1-r0:
+#     - CVE-2025-15661
+#     - CVE-2026-55199
+#     - CVE-2026-55200
+#   1.96.0-r0:
+#     - CVE-2026-5222
+#     - CVE-2026-5223
+#   1.94.0-r1:
+#     - CVE-2026-33056
+#   1.71.1-r0:
+#     - CVE-2023-38497
+#   1.66.1-r0:
+#     - CVE-2022-46176
+#   1.56.1-r0:
+#     - CVE-2021-42574
+#   1.52.1-r1:
+#     - CVE-2021-29922
+#   1.51.0-r2:
+#     - CVE-2020-36323
+#     - CVE-2021-31162
+#   1.34.2-r0:
+#     - CVE-2019-12083
+#   1.26.0-r0:
+#     - CVE-2019-16760
+
+# We have to add new architectures in multiple steps:
+# 1. Compile with the upstream triplets, compiling alpine's triplets in
+# 2. Compile again, now with our triplets selected as build/target, now that
+#    rustc knows about them
+_build="${CBUILD/-alpine/-unknown}"
+_target="${CHOST/-alpine/-unknown}"  #_target="${CTARGET/-alpine/-unknown}" ?
+
+_rlibdir="usr/lib/rustlib/${_target}/lib"
+_sharedir="usr/share/rust"
+
+ldpath="/${_rlibdir}"
+
+export LIBSQLITE3_SYS_USE_PKG_CONFIG=1 OPENSSL_NO_VENDOR=1  # LIBGIT2_NO_VENDOR=1 LIBSSH2_SYS_USE_PKG_CONFIG=1
+export RUST_BACKTRACE=full
+export RUST_MIN_STACK=$((2**24))  # works only since 1.79, but it shouldn't be a problem before
+
+export gztool="$(command -v pigz || echo gzip -9)"
+export xztool="$(command -v pixz || echo xz -T0 -9e)"
+
+# this is useful for when we have to patch vendored projects
+_clear_vendor_checksums() {
+	sed -i 's/\("files":{\)[^}]*/\1/' vendor/${1}/.cargo-checksum.json
+}
+
+_system_dylib(){
+	_rustc_ver="${1:-1.74.0}"
+	grep -nr 'crt_static_default\s*=\s*true' "${srcdir}/rustc-${_rustc_ver}-src/compiler/rustc_target/" | awk -F: '/linux/{print $1}' | sort -u | xargs -r -- sed -i 's@\(\s*\)\(\S*crt_static_default\s*=\s*true\)@\1//\2@g'  # disable default static linking on linux targets
+
+	grep -nr 'objects_self_contained' "${srcdir}/rustc-${_rustc_ver}-src/compiler/rustc_target/" | awk -F: '/musl/{print $1}' | sort -u | xargs -r -- sed -i '/self_contained/d'  # musl-specific
+	patch -Np1 -d "${srcdir}/rustc-${_rustc_ver}-src" -i "${srcdir}/musl-dylib.patch"
+
+	## can't remove llvm, because musl targets require CRTs, rendering this effort a foregone conclusion https://github.com/rust-lang/rust/pull/71769
+	#rm -rf "${srcdir}/rustc-${_rustc_ver}-src/src/llvm-project"
+}
+
+_unpack_build_dist() {
+	local distname="${1}" destdir="${2}" tarball=
+
+	case "${distname}" in
+	rust-src)
+		tarball="${srcdir}/rustc-${pkgver}-src/build/dist/rust-src-${pkgver}.tar.xz"
+		;;
+	rust-std-*)
+		tarball="${srcdir}/rustc-${pkgver}-src/build/dist/rust-std-${pkgver}-${distname#rust-std-*}.tar.xz"
+		;;
+	*)
+		tarball="${srcdir}/rustc-${pkgver}-src/build/dist/${distname}-${pkgver}-${_target}.tar.xz"
+		;;
+	esac
+
+	tar -I "${xztool} -d" -xf "${tarball}" -C "${destdir}" --strip-components=2 --exclude=manifest.in --no-same-owner
+}
+
+prepare() {
+	patch -Np1 -d "${srcdir}/mrustc-${_mrustc_ver}" -i "${srcdir}/56e4d7a37155526497354a9a1e500ff9dc8a423d.patch"  # mrustc cstdint patch
+}
+
+build() {
+	mkdir -p "${srcdir}/bin"
+	_old_path="${PATH}"
+	export PATH="${srcdir}/bin:${PATH}" WASI_SDK_PATH=/usr LDFLAGS="${LDFLAGS} -fno-lto" \
+		CFLAGS="${CFLAGS} -fno-lto -O2" CXXFLAGS="${CXXFLAGS} -fno-lto -O2"
+	for j in LTO CODEGEN_UNITS PANIC OPT_LEVEL; do  # default abuild settings go buh-bye
+		for i in $(env | awk -F= "/^CARGO_PROFILE_[^_]*_${j}/{print \$1}"); do unset "${i}"; :||export "${i}=off"; done
+	done
+	#RUSTFLAGS="${RUSTFLAGS} -Clto=off -Clinker-plugin-lto=off"
+
+	cd "${srcdir}/mrustc-${_mrustc_ver}"
+	export RUSTC_VERSION=1.74.0 MRUSTC_TARGET_VER=1.74 STD_ENV_ARCH="${CARCH}" PARLEVEL="${JOBS:-$(nproc)}"
+	command -v ccache &>/dev/null && export MRUSTC_CCACHE=1 ||:
+	make --trace bin/mrustc; make --trace -C tools/minicargo/; cp bin/minicargo bin/mrustc "${srcdir}/bin/"
+
+	tar -C "${srcdir}" -xJf "${srcdir}/rustc-${RUSTC_VERSION}-src.tar.xz.noextract"
+	mkdir -p "${srcdir}/rustc-${RUSTC_VERSION}-src/mrustc-stdlib/"
+	cp "${srcdir}/Cargo.toml" "${srcdir}/rustc-${RUSTC_VERSION}-src/mrustc-stdlib/Cargo.toml"
+	echo '#![no_core]' >"${srcdir}/rustc-${RUSTC_VERSION}-src/mrustc-stdlib/lib.rs"
+	patch -Np0 -d "${srcdir}/rustc-${RUSTC_VERSION}-src" -i "${srcdir}/mrustc-${_mrustc_ver}/rustc-${RUSTC_VERSION}-src.patch"
+
+	_system_dylib "${RUSTC_VERSION}"
+
+	export MRUSTC_LIBDIR="${srcdir}/rustlib-${RUSTC_VERSION}"
+	VENDOR_DIR="${srcdir}/rustc-${RUSTC_VERSION}-src/vendor"
+	OVERRIDES="${srcdir}/mrustc-${_mrustc_ver}/rustc-${RUSTC_VERSION}-overrides.toml"
+
+	cd "${srcdir}"
+	minicargo --output-dir "${MRUSTC_LIBDIR}" --vendor-dir "${VENDOR_DIR}" -j ${JOBS:-$(nproc)} \
+		--script-overrides "${srcdir}/mrustc-${_mrustc_ver}/script-overrides/stable-${RUSTC_VERSION}-linux/" \
+		--manifest-overrides "${OVERRIDES}" "${srcdir}/rustc-${RUSTC_VERSION}-src/mrustc-stdlib"
+	minicargo --output-dir "${MRUSTC_LIBDIR}" --manifest-overrides "${OVERRIDES}" -j ${JOBS:-$(nproc)} \
+		"${srcdir}/mrustc-${_mrustc_ver}/lib/libproc_macro"
+
+	_old_ld_library_path="${LD_LIBRARY_PATH}"
+	export LLVM_CONFIG=/usr/bin/llvm-config-17 CFG_RELEASE_CHANNEL="stable" \
+		LLVM_LINK_SHARED=1 REAL_LIBRARY_PATH_VAR="LD_LIBRARY_PATH" \
+		LD_LIBRARY_PATH="${MRUSTC_LIBDIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" \
+		CFG_RELEASE="${RUSTC_VERSION}" CFG_VERSION="${RUSTC_VERSION}-stable-mrustc" \
+		RUSTC_INSTALL_BINDIR="${srcdir}/bin" CFG_COMPILER_HOST_TRIPLE="${_target}"
+
+	RUSTC_BOOTSTRAP=1 minicargo --vendor-dir "${VENDOR_DIR}" --manifest-overrides "${OVERRIDES}" \
+		--output-dir "${srcdir}/rustc-${RUSTC_VERSION}-src/build" --features llvm -j ${JOBS:-$(nproc)} \
+		-L "${MRUSTC_LIBDIR}" "${srcdir}/rustc-${RUSTC_VERSION}-src/compiler/rustc"
+	:||minicargo --vendor-dir "${VENDOR_DIR}" --manifest-overrides "${OVERRIDES}" -j ${JOBS:-$(nproc)} \
+		--output-dir "${srcdir}/rustc-${RUSTC_VERSION}-src/build" --features llvm \
+		-L "${MRUSTC_LIBDIR}" "${srcdir}/rustc-${RUSTC_VERSION}-src/compiler/rustc_driver"
+	unset LLVM_CONFIG LLVM_LINK_SHARED REAL_LIBRARY_PATH REAL_LIBRARY_PATH_VAR
+	export LD_LIBRARY_PATH="${_old_ld_library_path}"
+	minicargo --vendor-dir "${VENDOR_DIR}" --manifest-overrides "${OVERRIDES}" -j ${JOBS:-$(nproc)} \
+		--output-dir "${srcdir}/rustc-${RUSTC_VERSION}-src/build" --features vendored-openssl \
+		-L "${MRUSTC_LIBDIR}" "${srcdir}/rustc-${RUSTC_VERSION}-src/src/tools/cargo"
+
+	cp "${srcdir}/rustc-${RUSTC_VERSION}-src/build/rustc_main" "${srcdir}/bin/rustc"
+	cp "${srcdir}/rustc-${RUSTC_VERSION}-src/build/cargo"      "${srcdir}/bin/cargo"
+	rm -rf "${srcdir}/rustc-${RUSTC_VERSION}-src/build/"
+
+	# sysroot is metapackage for std+panic_unwind+test
+	# MRUSTC_PATH basename has to be either of ["rustc", "rust.exe"], due to minicargo-hardcoded condition
+	_LIBDIR="${srcdir}/lib/rustlib/${_target}/lib"; mkdir -p "${_LIBDIR}"
+	MRUSTC_PATH="${srcdir}/bin/rustc" minicargo --vendor-dir "${VENDOR_DIR}" -j ${JOBS:-$(nproc)} \
+		--script-overrides "${srcdir}/mrustc-${_mrustc_ver}/script-overrides/stable-${RUSTC_VERSION}-linux/" \
+		-L "${MRUSTC_LIBDIR}" --output-dir "${_LIBDIR}" "${srcdir}/rustc-${RUSTC_VERSION}-src/library/sysroot"
+
+	# can't escape file templating…
+	CARGO_HOME="${srcdir}/.cargo"; mkdir -p "${CARGO_HOME}"
+	cat <<EOF >"${CARGO_HOME}/config"
+[source.crates-io]
+replace-with = "vendored-sources"
+[source.vendored-sources]
+directory = "${VENDOR_DIR}"
+EOF
+	ln -s config "${CARGO_HOME}/config.toml"
+
+	export RUSTC="${srcdir}/bin/rustc" RUSTC_BOOTSTRAP=1 CARGO_HOME="${CARGO_HOME}" \
+		LLVM_CONFIG=/usr/bin/llvm-config-17 LLVM_LINK_SHARED=1 REAL_LIBRARY_PATH_VAR="LD_LIBRARY_PATH" \
+		RUSTFLAGS='-Z force-unstable-if-unmarked -C link_args=-Wl,-rpath,\$ORIGIN/../lib -C target-feature=-crt-static'
+
+	cargo build --manifest-path "${srcdir}/rustc-${RUSTC_VERSION}-src/library/sysroot/Cargo.toml" \
+		--target "${_target}" -j${JOBS:-$(nproc)} --release --verbose --features panic-unwind
+
+	RUSTFLAGS="${RUSTFLAGS} -C panic=unwind" cargo build --target "${_target}" \
+		--manifest-path "${srcdir}/rustc-${RUSTC_VERSION}-src/compiler/rustc/Cargo.toml" -j${JOBS:-$(nproc)} \
+		--release --verbose --features llvm
+
+	cp "${srcdir}/rustc-${RUSTC_VERSION}-src/target/${_target}/release/rustc-main" "${srcdir}/bin/rustc"
+	cp "${srcdir}/rustc-${RUSTC_VERSION}-src/target/${_target}/release/librustc_driver.so" "${srcdir}/lib"
+	export LD_LIBRARY_PATH="${srcdir}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+	RUSTFLAGS="${RUSTFLAGS} -C panic=unwind" cargo build --target "${_target}" \
+		--manifest-path "${srcdir}/rustc-${RUSTC_VERSION}-src/src/tools/cargo/Cargo.toml" -j${JOBS:-$(nproc)} \
+		--release --verbose
+
+	unset LLVM_CONFIG LLVM_LINK_SHARED REAL_LIBRARY_PATH REAL_LIBRARY_PATH_VAR
+	_old_path="${PATH}"
+
+	for i in ${_rust_changeid}; do
+		_major="${i%.*}";_major="${_major#*.}"
+		tar -C "${srcdir}" --strip-components 2 -xJ \
+			-f "${srcdir}/rustc-${_prev:-${RUSTC_VERSION}}-src/build/dist/rustc-${_prev:-${RUSTC_VERSION}}-${_target}.tar.xz" \
+				"rustc-${_prev:-${RUSTC_VERSION}}-${_target}/rustc/bin" \
+				"rustc-${_prev:-${RUSTC_VERSION}}-${_target}/rustc/lib" \
+			|| cp "${srcdir}/rustc-${_prev:-${RUSTC_VERSION}}-src/target/${_target}/release/rustc-main" "${srcdir}/bin/rustc"
+		tar -C "${srcdir}" --strip-components 2 -xJ "cargo-${_prev:-${RUSTC_VERSION}}-${_target}/cargo/bin" \
+			-f "${srcdir}/rustc-${_prev:-${RUSTC_VERSION}}-src/build/dist/cargo-${_prev:-${RUSTC_VERSION}}-${_target}.tar.xz" || \
+			cp "${srcdir}/rustc-${_prev:-${RUSTC_VERSION}}-src/src/tools/cargo/target/${_target}/release/cargo" "${srcdir}/bin/cargo"
+		tar -C "${srcdir}" --strip-components 2 -xJ "rust-std-${_prev:-${RUSTC_VERSION}}-${_target}/rust-std-${_target}/lib" \
+			-f "${srcdir}/rustc-${_prev:-${RUSTC_VERSION}}-src/build/dist/rust-std-${_prev:-${RUSTC_VERSION}}-${_target}.tar.xz" ||:
+		_llvm_ver=$(set -eo pipefail;echo ${_rust_llvm}|tr ';' '\n'|grep "^${i%.*}:");_llvm_ver="${_llvm_ver#*:}"
+		export PATH="/usr/lib/llvm${_llvm_ver}/bin${PATH:+:${PATH}}"
+
+		tar -C "${srcdir}" -xJf "${srcdir}/rustc-${i%:*}-src.tar.xz.noextract"
+		[ "${_major}" = "${MRUSTC_TARGET_VER}" ] || _system_dylib "${i%:*}"
+		cd "${srcdir}/rustc-${i%:*}-src"
+
+		local extra_conf_opts=""
+
+		local tools="cargo" targets="${_target}"
+		if [ "${pkgver}" != "${i%:*}" ]; then
+			extra_conf_opts="${extra_conf_opts} --set=rust.incremental=true"
+		else
+			if [ "${_build}" != "${_target}" ]; then
+				# Use variables with triplets since they are otherwise passed to the wrong targets
+				_target="${_target}"
+				export "PKG_CONFIG_SYSROOT_DIR_${_target//-/_}=${PKG_CONFIG_SYSROOT_DIR}" "PKG_CONFIG_PATH_${_target//-/_}=${PKG_CONFIG_PATH}"
+				export "CFLAGS_${_target//-/_}=${CFLAGS}" "CXXFLAGS_${_target//-/_}=${CXXFLAGS}" "CFLAGS_${_build//-/_}=${BUILDCFLAGS} -O2" "CXXFLAGS_${_build//-/_}=${BUILDCXXFLAGS} -O2"
+				unset RUSTFLAGS CC CXX CFLAGS CXXFLAGS PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH  # still might need disabling LTO?
+
+				# Cross compiling is just a hack, make the hack work with alpine
+				# https://github.com/rust-lang/rust/blob/f19142044f270760ce0ebc03b2c3a44217d8703d/compiler/rustc_llvm/build.rs#L327
+				cat << EOF >"${srcdir}/bin/llvm-config"
+#!/bin/sh -e
+for i; do
+	case "\${i}" in
+		--ldflags) printf '-L%s/usr/lib/llvm${_llvm_ver}/lib\n' "\${CBUILDROOT}"; exit ;;
+		--libdir) printf '%s/usr/lib/llvm${_llvm_ver}/lib\n' "\${CBUILDROOT}"; exit ;;
+		--bindir) printf '%s/usr/lib/llvm${_llvm_ver}/bin\n' "\${CBUILDROOT}"; exit ;;
+		# Enabled targets vary between arches
+		--components) printf '%s\n' 'ipo bitreader bitwriter linker asmparser lto coverage instrumentation $(
+				sed -n 's/^set(LLVM_TARGETS_TO_BUILD \(.*\))$/\1/p' "${CBUILDROOT}/usr/lib/llvm${_llvm_ver}/lib/cmake/llvm/LLVMConfig.cmake" | tr 'A-Z;' 'a-z '
+		)'; exit ;;
+	esac
+done
+exec "$(PATH="${_old_path}" command -v llvm-config)" "\${@}"
+EOF
+				chmod +x "${srcdir}/bin/llvm-config"
+			fi  # [ "${_build}" != "${_target}" ]
+
+			extra_conf_opts="${extra_conf_opts}
+				--set=rust.incremental=false --set=rust.remap-debuginfo=true
+				--set=rust.debuginfo-level=2 --set=rust.debuginfo-level-std=2
+				"
+			tools="${tools},clippy,src,rustdoc,rustfmt,rust-analyzer-proc-macro-srv,rust-demangler,wasm-component-ld"
+
+			# absolutely do not set these here, rust "knows" what it's doing
+			unset CARGO_PROFILE_RELEASE_LTO
+			unset CARGO_PROFILE_RELEASE_OPT_LEVEL
+			unset CARGO_PROFILE_RELEASE_PANIC
+			unset CARGO_PROFILE_RELEASE_CODEGEN_UNITS
+
+			# these invoke llvm build, nah…
+			#[ "${_major}" -lt "83" ] || extra_conf_opts="${extra_conf_opts} --set=dist.vendor=false"
+			#[ "${_major}" -lt "88" ] || extra_conf_opts="${extra_conf_opts} --set=gcc.download-ci-gcc=false"
+
+			if command -v ccache &>/dev/null; then
+				[ "${_major}" -lt "86" ] && extra_conf_opts="${extra_conf_opts} --set=llvm.ccache=true" || extra_conf_opts="${extra_conf_opts} --set=build.ccache=true"
+			fi
+
+			_optimized_compiler_builtins_ver="91"  #_optimized_compiler_builtins_ver="86"  #== boolean type
+			[ -z "${_prev}" ] || extra_conf_opts="${extra_conf_opts} --enable-profiler"
+			[ "${_major}" -lt "77" ] || extra_conf_opts="${extra_conf_opts} --set=change-id=${i#*:}"
+			[ "${_major}" -lt "${_optimized_compiler_builtins_ver}" ] || extra_conf_opts="${extra_conf_opts}
+				--set=target.${_target}.optimized-compiler-builtins=$(/usr/lib/llvm${_llvm_ver}/bin/clang -print-resource-dir)/lib/linux/libclang_rt.builtins-${_target%%-*}.a"
+
+			if subpackage_types_has wasm; then
+				targets="${targets},wasm32-unknown-unknown"
+				extra_conf_opts="${extra_conf_opts}
+					--set=target.wasm32-unknown-unknown.sanitizers=false
+					--set=target.wasm32-unknown-unknown.profiler=false
+					--set=target.wasm32-unknown-unknown.cc=clang-${_llvm_ver}
+					--set=target.wasm32-unknown-unknown.linker=wasm-ld
+					"
+
+				[ "${_major}" -lt "78" ] || _extra_targets="${_extra_targets} wasm32-wasip1" \
+					_target_wasi_preview="wasm32-wasip1-threads wasm32-wasip2"
+				[ "${_major}" -lt "84" ] || _extra_targets="${_extra_targets} wasm32v1-none"
+
+				for t in ${_extra_targets} ${_target_wasi_preview:-wasm32-wasi-preview1-threads wasm32-wasi-preview2}; do
+					targets="${targets},${t}"
+					extra_conf_opts="${extra_conf_opts}
+						--set=target.${t}.sanitizers=false
+						--set=target.${t}.profiler=false
+						--set=target.${t}.wasi-root=/usr/share/wasi-sysroot
+						--set=target.${t}.cc=clang-${_llvm_ver}
+						--set=target.${t}.cxx=clang++-${_llvm_ver}
+						--set=target.${t}.ar=llvm${_llvm_ver}-ar
+						--set=target.${t}.ranlib=llvm${_llvm_ver}-ranlib
+						--set=target.${t}.linker=wasm-ld
+						"
+				done
+			fi  # subpackage_types_has wasm
+
+			local "_uefi_target=${CHOST%%-*}-unknown-uefi"
+			if subpackage_types_has uefi; then
+				targets="${targets},${_uefi_target}"
+				extra_conf_opts="${extra_conf_opts}
+					--set=target.${_uefi_target}.crt-static=true
+					--set=target.${_uefi_target}.cc=clang-${_llvm_ver}
+					--set=target.${_uefi_target}.linker=lld
+					--set=target.${_uefi_target}.profiler=false
+					--set=target.${_uefi_target}.optimized-compiler-builtins=false
+					"
+			fi
+		fi  # [ "${pkgver}" = "${i%:*}" ]
+		#[ "${_major}" -lt "87" ] && extra_conf_opts="${extra_conf_opts} --set=rust.description='Alpine Linux Rust ${i%:*}-r${pkgrel}'" || extra_conf_opts="${extra_conf_opts} --set=build.description='Alpine Linux Rust ${i%:*}-r${pkgrel}'"
+
+			#--set="rust.incremental=$([ -n "${BOOTSTRAP}" ] && echo true || echo false)" \
+		# ./configure will not run when bootstrap.toml exists,
+		# so assume we are restarting the build with ./x.py
+		[ -f "bootstrap.toml" ] || ./configure \
+			--build="${_build}" \
+			--host="${_target}" \
+			--target="${targets}" \
+			--prefix="/usr" \
+			--release-channel="stable" \
+			--enable-local-rust \
+			--disable-docs \
+			--enable-extended \
+			--tools="${tools}" \
+			--enable-llvm-link-shared \
+			--enable-option-checking \
+			--enable-locked-deps \
+			--enable-vendor \
+			--dist-compression-formats=xz \
+			--set="dist.compression-profile=fast" \
+			--python="python3" \
+			--set="rust.codegen-units=1" \
+			--set="rust.codegen-units-std=1" \
+			--set="rust.deny-warnings=false" \
+			--set="rust.lld=false" \
+			--set="rust.backtrace-on-ice=true" \
+			--set="build.build-stage=2" --set="build.doc-stage=2" --set="build.test-stage=2" \
+			--set="llvm.download-ci-llvm=false" --set="rust.download-rustc=false" \
+			--set="rust.lto=off" \
+			--set="target.${_target}.llvm-config=${srcdir}/bin/llvm-config" \
+			--set="target.${_target}.crt-static=false" \
+			--set="target.${_target}.cc=${CROSS_COMPILE}cc" \
+			--set="target.${_target}.cxx=${CROSS_COMPILE}c++" \
+			--set="target.${_target}.ar=${CROSS_COMPILE}ar" \
+			--set="target.${_target}.linker=${CROSS_COMPILE}cc" \
+			--set="target.${_build}.llvm-config=$(command -v llvm-config)" \
+			--set="target.${_build}.crt-static=false" \
+			--set="target.${_build}.cc=cc" \
+			--set="target.${_build}.cxx=c++" \
+			--set="target.${_build}.ar=ar" \
+			--set="target.${_build}.linker=cc" \
+			${extra_conf_opts}
+
+		python3 ./x.py dist -vv --jobs ${JOBS:-$(nproc)} ${BOOTSTRAP:+cargo rustc rust-std}
+
+		cd "${srcdir}/"
+		#rm -rf "${srcdir}/rustc-${_prev_prev}-src";_prev_prev="${_prev}" _prev="${i%:*}"
+		rm -rf "${srcdir}/rustc-${_prev}-src";_prev="${i%:*}"
+		export PATH="${_old_path}" LD_LIBRARY_PATH="${_old_ld_library_path}"
+	done  # for i in ${_rust_changeid}
+}
+
+check() {
+	# At this moment lib/rustlib/${CHOST}/lib does not contain a complete
+	# copy of the .so libs from lib (they will be copied there during
+	# 'x.py install'). Thus we must set LD_LIBRARY_PATH for tests to work.
+
+  # is riscv64 still broken?
+
+	msg "Setting up test env..."
+
+	mkdir -p "${srcdir}/rustc-${pkgver}-src/test-rustc"
+
+	_unpack_build_dist rustc    "${srcdir}/rustc-${pkgver}-src/test-rustc" &
+	_unpack_build_dist rust-std "${srcdir}/rustc-${pkgver}-src/test-rustc" &
+	wait
+
+	export LD_LIBRARY_PATH="${srcdir}/rustc-${pkgver}-src/test-rustc/lib/rustlib/${CHOST}/lib"  # CTARGET?
+
+	msg "Sanity checks..."
+	"${srcdir}/check-rustc" "${srcdir}/rustc-${pkgver}-src/test-rustc/bin/rustc"
+
+	# XXX: There's some problem with these tests, we will figure it out later.
+	#	make check \
+	#		LD_LIBRARY_PATH="${_stage0dir}/lib" \
+	#		VERBOSE=1
+
+	# these rebuild the whole compiler which takes a long time
+	# msg "Running tests for cargo..."
+	# CFG_DISABLE_CROSS_TESTS=1 python3 ./x.py test --no-fail-fast src/tools/cargo
+
+	unset LD_LIBRARY_PATH
+}
+
+package() {
+	# merged into main package
+	provides="${provides} rust-stdlib=${pkgver}-r${pkgrel}"
+	replaces="rust-stdlib"
+
+	mkdir -p "${pkgdir}/usr"
+
+	cd "${pkgdir}"
+
+	_unpack_build_dist rustc     "${pkgdir}/usr" &
+	_unpack_build_dist rust-std  "${pkgdir}/usr" &
+	_unpack_build_dist cargo     "${pkgdir}/usr" &
+	wait
+
+	_unpack_build_dist rustc-dev "${pkgdir}/usr" &
+	_unpack_build_dist rust-src  "${pkgdir}/usr" &
+	wait
+	_unpack_build_dist clippy    "${pkgdir}/usr" &
+	_unpack_build_dist rustfmt   "${pkgdir}/usr" &
+	if subpackage_types_has wasm; then
+		_unpack_build_dist rust-std-wasm32-unknown-unknown "${pkgdir}/usr" &
+		_unpack_build_dist rust-std-wasm32-wasip1          "${pkgdir}/usr" &
+		_unpack_build_dist rust-std-wasm32-wasip1-threads  "${pkgdir}/usr" &
+		_unpack_build_dist rust-std-wasm32-wasip2          "${pkgdir}/usr" &
+	fi
+	if subpackage_types_has uefi; then
+		_unpack_build_dist "rust-std-${_target%%-*}-unknown-uefi" "${pkgdir}/usr" &
+	fi
+	wait
+
+	# Prevent rustc-dev from providing the same *.so files,
+	# which causes it to conflict with the main rust package.
+	local libpath; for libpath in usr/lib/*.so; do
+		rm "${_rlibdir}/${libpath##*/}"
+		ln -s "/${libpath}" "${_rlibdir}/"
+	done
+
+	# We don't want to include stuff like rust-llvm-* tools, as we will use the
+	# system tools.
+	rm -f "usr/lib/rustlib/${_target}/bin/rust-llvm-"*
+
+	# Python scripts are noarch, so move them to /usr/share.
+	# Requires move-py-scripts-to-share.patch to be applied.
+	_mv usr/lib/rustlib/etc/*.py "${_sharedir}/etc/"
+	rmdir -p usr/lib/rustlib/etc 2>/dev/null ||:
+
+	_mv usr/etc/bash_completion.d/cargo usr/share/bash-completion/completions/
+	rmdir -p usr/etc/bash_completion.d 2>/dev/null ||:
+
+	_mv usr/lib/rustlib/src/rust usr/src/
+	ln -s ../../../src/rust usr/lib/rustlib/src/rust
+	mv usr/lib/rustlib/rustc-src/rust usr/src/rustc
+	ln -s ../../../src/rustc usr/lib/rustlib/rustc-src/rust
+
+	# we don't want to introduce a usr/etc/ but the file could still be useful
+	# even though there's the --print target-spec-json-schema option
+	_mv usr/etc/target-spec-json-schema.json usr/share/doc/rust/
+	rmdir usr/etc 2>/dev/null ||:
+
+	# Remove some clutter.
+	cd "${pkgdir}/usr/lib/rustlib"
+	rm -f components install.log manifest-* rust-installer-version uninstall.sh
+	if [ "${_build}" != "${_target}" ]; then
+		rm -rf "${pkgdir}/usr/lib/rustlib/${_build}"
+	fi
+	# the below were added with the 1.94.0 upgrade and almost doubled the size
+	# of the rust-wasm and rust-uefi subpackages and don't seem to be needed
+	rm -rf "${pkgdir}/usr/lib/rustlib/wasm32-"*/lib/*.rmeta \
+		"${pkgdir}/usr/lib/rustlib/"*-uefi/lib/*.rmeta
+	# if they would later be found to be useful, please move them to
+	# rust-wasm-dev and rust-uefi-dev subpackages
+
+	# for some reason the tar archive gets some root-only files for rlibs
+	find "${pkgdir}/usr/lib/rustlib" -type f -perm -600 -exec chmod 0644 {} \+
+	find "${pkgdir}/usr/lib/rustlib" -type f -perm -700 -exec chmod 0755 {} \+
+
+	# link scudo to tools by default on architectures where it works well
+	# this is roughly 20+% faster with no downside except slightly higher
+	# memory use, but this is a compiler that already uses a ton of memory
+	case "${CARCH}" in
+	arm*) ;;
+	*)
+		patchelf --add-needed libscudo.so \
+			"${pkgdir}/usr/bin/cargo" \
+			"${pkgdir}/usr/bin/rustc" \
+			"${pkgdir}/usr/bin/rustdoc"
+		;;
+	esac
+}
+
+_rustc_dev() {
+	pkgdesc="${pkgdesc} (compiler libraries)"
+
+	# needs embed-metadata.patch
+	amove "${_rlibdir}/lib"*.rmeta \
+		"${_rlibdir}/lib"*.so
+}
+
+wasm() {
+	pkgdesc="WebAssembly targets for rust"
+	url="https://rust-lang.org/what/wasm/"
+	depends="rust=${pkgver}-r${pkgrel} lld wasi-libc"
+
+	amove usr/lib/rustlib/wasm32-*
+}
+
+uefi() {
+	pkgdesc="UEFI targets for rust"
+	url="https://rust-osdev.com/uefi-book"
+	depends="rust=${pkgver}-r${pkgrel} lld"
+
+	amove usr/lib/rustlib/*-uefi
+}
+
+analysis() {
+	pkgdesc="Compiler analysis data for the Rust standard library"
+	depends="${pkgname}=${pkgver}-r${pkgrel}"
+
+	amove "${_rlibdir}/../analysis"
+}
+
+gdb() {
+	pkgdesc="GDB pretty printers for Rust"
+	url="https://rustc-dev-guide.rust-lang.org/debugging-support-in-rustc.html"
+	depends="${pkgname}=${pkgver}-r${pkgrel} gdb"
+
+	amove usr/bin/rust-gdb*
+	amove "${_sharedir}/etc/gdb_"*.py
+}
+
+lldb() {
+	pkgdesc="LLDB pretty printers for Rust"
+	url="https://rustc-dev-guide.rust-lang.org/debugging-support-in-rustc.html"
+	depends="${pkgname}=${pkgver}-r${pkgrel} lldb py3-lldb"
+
+	amove usr/bin/rust-lldb
+	amove "${_sharedir}/etc/lldb_"*.py
+	amove usr/lib/rustlib/etc/lldb_commands
+}
+
+clippy() {
+	pkgdesc="Lints to catch common mistakes and improve your Rust code"
+	license="MIT or Apache-2.0"
+	url="https://doc.rust-lang.org/clippy/"
+	depends="cargo=${pkgver}-r${pkgrel}"
+
+	amove usr/bin/cargo-clippy
+	amove usr/bin/clippy-driver
+}
+
+_clippy_doc() {
+	pkgdesc="Rust Code Linter (documentation)"
+	install_if="docs rust-clippy=${pkgver}-r${pkgrel}"
+
+	# XXX: This is hackish!
+	cd "${pkgdir}/../${pkgname}-doc"
+	_mv "${srcdir}/rustc-${pkgver}-src/src/tools/clippy/book/src/"* usr/share/doc/clippy/* \
+		"${subpkgdir}/usr/share/doc/rust-clippy/" ||:
+	rm -rf usr/share/doc/clippy 2>/dev/null ||:
+}
+
+src() {
+	pkgdesc="${pkgdesc} (source code)"
+	license="(${license}) AND OFL-1.1 AND GPL-3.0-or-later AND GPL-3.0-with-GCC-exception AND CC-BY-SA-3.0 LGPL-3.0"
+	url="https://github.com/rust-lang/rust/tree/${pkgver}"
+	depends="${pkgname}=${pkgver}-r${pkgrel}"
+
+	amove usr/src \
+		usr/lib/rustlib/src \
+		usr/lib/rustlib/rustc-src
+}
+
+_cargo() {
+	pkgdesc="The Rust package manager"
+	license="(Apache-2.0 OR MIT) AND UNLICENSE"
+	url="https://doc.rust-lang.org/cargo/"
+	depends="${pkgname}=${pkgver}-r${pkgrel}"
+	# XXX: See comment on top-level provides=.
+	provides="cargo-bootstrap=${pkgver}-r${pkgrel}"
+
+	amove usr/bin/cargo
+}
+
+_cargo_bashcomp() {
+	default_bashcomp
+
+	pkgdesc="Bash completions for cargo"
+	url="https://doc.rust-lang.org/cargo/"
+	install_if="cargo=${pkgver}-r${pkgrel} bash-completion"
+}
+
+_cargo_zshcomp() {
+	default_zshcomp
+
+	pkgdesc="ZSH completions for cargo"
+	url="https://doc.rust-lang.org/cargo/"
+	install_if="cargo=${pkgver}-r${pkgrel} zsh"
+}
+
+_cargo_doc() {
+	pkgdesc="The Rust package manager (documentation)"
+	url="https://doc.rust-lang.org/cargo/"
+	install_if="docs cargo=${pkgver}-r${pkgrel}"
+
+	# XXX: This is hackish!
+	cd "${pkgdir}/../${pkgname}-doc"
+	_mv usr/share/man/man1/cargo* "${subpkgdir}/usr/share/man/man1/"
+	_mv usr/share/doc/cargo "${subpkgdir}/usr/share/doc/"
+}
+
+rustfmt() {
+	pkgdesc="Rust Code Formatter"
+	license="Apache-2.0 OR MIT"
+	url="https://rust-lang.github.io/rustfmt/"
+	depends="cargo=${pkgver}-r${pkgrel}"
+
+	amove usr/bin/rustfmt
+	amove usr/bin/cargo-fmt
+}
+
+_rustfmt_doc() {
+	pkgdesc="Rust Code Formatter (documentation)"
+	url="https://rust-lang.github.io/rustfmt/"
+	install_if="docs rustfmt=${pkgver}-r${pkgrel}"
+
+	cd "${pkgdir}/../${pkgname}-doc"
+	_mv usr/share/doc/rustfmt "${subpkgdir}/usr/share/doc/"
+	install -Dm0644 -t "${subpkgdir}/usr/share/doc/rustfmt/" \
+		"${srcdir}/rustc-${pkgver}-src/src/tools/rustfmt/README.md" \
+		"${srcdir}/rustc-${pkgver}-src/src/tools/rustfmt/Configurations.md" \
+		"${srcdir}/rustc-${pkgver}-src/src/tools/rustfmt/Design.md"
+}
+
+_wasm_cmld() {
+	pkgdesc="Command line linker for creating WebAssembly components"
+	url="https://github.com/bytecodealliance/wasm-component-ld"
+	depends="lld22" # wasm-ld
+
+	install -Dm0755 -t "${subpkgdir}/usr/bin/" \
+		"${pkgdir}/usr/lib/rustlib/${CHOST}/bin/wasm-component-ld"
+}
+
+_wasm_cmld_dbg() {
+	pkgdesc="Command line linker for creating WebAssembly components (debug info)"
+	url="https://github.com/bytecodealliance/wasm-component-ld"
+	depends="wasm-component-ld=${pkgver}-r${pkgrel}"
+
+	cd "${pkgdir}/../${pkgname}-dbg"
+	_dbgpath="usr/lib/debug/usr/lib/rustlib/${CHOST}/bin"
+	_mv "${_dbgpath}/wasm-component-ld.debug" "${subpkgdir}/${_dbgpath}/"
+}
+
+_mv() {
+	local dest; for dest; do :; done  # get last argument
+	mkdir -p "${dest}"
+	mv "${@}"
+}
+
+sha512sums="
+9a39249c38eee109c4f60af051df89aa5ab1e3408761d67d3ee8ae05cded03b9e4fd36b554a470e35c77d214bf02d39f172ab04fdcb8b03fac068d8af268ebf5  v${_mrustc_ver}.tar.gz
+cdb6dbf79fe34b216b237012d8b6d80520658d9483ce8b93f0d045459b72e2481640fde53b7cb42e2daa5a0a6b640a53923b4a02b9eb0d69cd160cbfdd4d28f6  56e4d7a37155526497354a9a1e500ff9dc8a423d.patch
+90d36f99b48ccbefe6b250cc3715c3f9a880faf9a668743b795e66fd1d77f6433d048f8beab3d05b090d8b93492d3070224d2da690b781ea344746d7dc7ee888  musl-dylib.patch
+b9c575d8a50b96730576bc9e7a6ec3a54d1cc3ded01f3ec5159d3e59f1e06129e38992bd9a379d2b54e6032c9ed33acb574fadffd9ce8fb99c4657bedace52b9  Cargo.toml
+d949987fab5b7fa4d92910cd4384debd11e598fd2b31d003439dd479977f3389e399d9fd9b43b9a856c54e8777fd10339e169dbb9e87b1a8b07a7ff2ff280c34  rustc-1.74.0-src.tar.xz.noextract
+7b0f25d91b1b5c317980fc88e059200bd43b56a70b445fbc72fb9b96e09775bfd3a98e9bd9d662af80f0ce3aef527c777ee82777e96ca876f47a972d63da8606  rustc-1.75.0-src.tar.xz.noextract
+92e16cfdeb91bde341fe6c2774d92868275b07aa1d46d870ddc9291eadfe4ea9af93e06586fa7d6b8d60534903945cbbe706d354c90272712989c58d2bf174bf  rustc-1.76.0-src.tar.xz.noextract
+ab099a5e545892f145af9f4c21f41693463248697accf1c92d9afbe6c711639c3859e89c1bb99b84854c462784cc5970fb84dd7c89260ff92174e3684f76920c  rustc-1.77.2-src.tar.xz.noextract
+d2fb9881e28849d871fda71b1b51652be3839b3283f0d32163f258c5c707a9fb7b589da8dc03bca2fefee1abdd2b44a5f17e85d8c6df7bea119d1e8d22371941  rustc-1.78.0-src.tar.xz.noextract
+99d7f276292e5c270648473ff73e9888413a3325ef3a4d7a45f8ce77a42ac87996905f1d875888ce084b621f642017bc9e31a00da1439108dbe19b85d0eab085  rustc-1.79.0-src.tar.xz.noextract
+3c746108a86eeb734c1a8c8f63ba1a45e2cb03a8cb553395a167d07dc3ce5d8d9ea365ddd95533b6952d915069b86cad7ad218d27861e0889f8e878136bd32ab  rustc-1.80.1-src.tar.xz.noextract
+b8a837ced521d2ca2c7f228a0640da591384519e4dbc1ae768524d50616da6abbd2f7bdae3777caebc0447dac91bf76481282ce5a2264d7f30e173caa6321a51  rustc-1.81.0-src.tar.xz.noextract
+d158c7c71c1814bde2a3ec3cbeabe34949bd3201b730c0d7ec6baad4158bb28dd13696c430a6b99dc38b9d23ad7ddf8dde7d2487cbfbbbe9c3473016994210f0  rustc-1.82.0-src.tar.xz.noextract
+64db57949c6ac1df6a3f4c6bd0938685a5fb1bc3d318b34ccfcfccb0f9eff1cffd4d8a53a190ef0409eeca9ad12bc6234c2c1de69196cc74ae02d6afa20d0ce6  rustc-1.83.0-src.tar.xz.noextract
+f1cc4765736551508408126e44086988e8ddc30c1a929bf7b61c6be85ad0d65928dd5fb1041cfaeee8eb37d2208f2c1917e276aef2bc9a8e40e34f6713b349e1  rustc-1.84.1-src.tar.xz.noextract
+d61afb4f00d0c63eef132e10ca5369202064ecad8ab5bcf4fbd62e9a20b2bd71840b2a769dadcf43452fc0448865975c9de1c129752caa9928d2757027bacf7c  rustc-1.85.1-src.tar.xz.noextract
+9ce195e24a03765f7163de16271e3d19d731d4b80fcc2bfd919106c9d42543eade018f712f6947ea3c6e57c6cb2e6841596aa668d608b8da15101a7da14f3097  rustc-1.86.0-src.tar.xz.noextract
+2ef08c9be45434401f916d54b3739f52d255f8a3a4ce05a717499250c2333eeaf601f1d18085b878c027c609f44da74d0151f5bfc2c9ae1e01166919a91a1d2b  rustc-1.87.0-src.tar.xz.noextract
+e6c62af2953f49462b2369e9551b12f2bec114577f90e3e76049636da4279b1e7f4d53bc6896f5d0d4715d90ef6d29dacff529a45690ffac6af62ad64600db40  rustc-1.88.0-src.tar.xz.noextract
+3ac0f02baaff12c67fe35cef4d56b315134d0a043bb6103a248a2842456c74733c6e3039f079bacfb8b8ab9b7487f92d678987e588bd41276abf9bf7c2f7870b  rustc-1.89.0-src.tar.xz.noextract
+fb0798b4c7450754db2fcbb641202909d209c6db2d9181d7df7282217b8320dc52f5e9853de9d7bdb79177f1f920389450cab07674dea5fb5501eaab5816662a  rustc-1.90.0-src.tar.xz.noextract
+68b6bebff2e1b3bc5762951bec60f55cb7f23fd516ca85195f8050790f20c6cefdc3c5ffe0c40aa2d34635f48fa01f567874bcea3076ad5c260eae1afd759870  rustc-1.91.1-src.tar.xz.noextract
+a2c0b127933595b9bc2063d7b7c88d9af512c4664b18f29d44c9a6e2c68d194b87a3071717e8f1b7c858ae940baca888e10be95cd31e0201916d0bfc312a3b15  rustc-1.92.0-src.tar.xz.noextract
+fbff2e960e20a5b4c1320bfe22aca445a5792c10f902c6eb69fc7de2a1f8965b06b0906141526a5f0fa02bcbb6b02d80865481bd62656f7b9a11fbdcf5bc9f02  rustc-1.93.1-src.tar.xz.noextract
+4d20f5b2df042517b14aa4d1a7e4b149b7490ac6be9977d9273f5f81b70ca110b35c554693e1c8a8e4722bdb06532d3972a88c0cb7a8081d3d1bdb23e01e1546  rustc-1.94.1-src.tar.xz.noextract
+685912ffff97063e55c85b2d15d06ba734980cef4b6e104caae1ea433958b12a8d651b757eef7b9f5b06dad3c246d819a5ee5574a26e05007ecdd378f0f041d0  rustc-1.95.0-src.tar.xz.noextract
+fa835f26e1969cababc3c32eeb064548fcb4f05cd1a25fd1b5f6f12660170225b389ca3442da1ef23f999e34ca8ec348810c498d1fff0bee140ec372a37009b1  rustc-1.96.1-src.tar.xz.noextract
+a04178bf0f2c43cbb503a5ea48145eebfee371766a589c0855079ae6a7f3945223850dcc6bce2a94b9f9ead1595d99de09bb00cd6180300e0da58dc247f043eb  rustc-1.97.1-src.tar.xz.noextract
+2065b0226ca1e8b909e50ce9afc0a1ff5b1d43d608b190bab4ec91b0e8c74b471927ea660ffc78d22e8b42001f436fdbf74d49f9b75d37541bba58d9dfded182  alpine-move-py-scripts-to-share.patch
+8b4b389fedeae2035c530e2fcf4526cdd6cd497e0fde609dec5a2f870f10e78bc2eade46bf6566d0a92bf52fed308eb4f82b310f6226ea76d6ac083a52cdecef  do-not-install-libunwind-source.patch
+d926a0dd5677f6277cf053290722e4b147185126e6d3e8097a5950e012f8e754d7f56cbc1a8e7a4a9f120f1a1d759f6ef1b115a4beb140a4566955cd4c4714d0  embed-metadata.patch
+47b1b637c0a6644e14129c4a31a8f8358e9124ed1b434143c9caf37a2916b1d249a85e74a2b6c8846d7cdb579dddced56861907d31cf59da13e25f737a3435f8  gcc-eh-libunwind.patch
+b283d31cc8d6559aa639d44f776e97c2a1e0f23c717b6784e549861b881555bd467fa6023180866aae81a9a58c5f83e306940ee645f3c6733a1bdef6130036c9  install-template-shebang.patch
+06d53c4aba64617bc8e3bb60d915e97a117c58240e72b35f2c3599194b6a351c5908bdf516152d7e68cb581762c21fb53eb6a996f349de7e0b2a778914a005de  no-export-ld-library-path.patch
+dc7dd0928f3d331ade83bb74125fd58b465cb04f8c75ea09b26ad062838cf1996ebae96af8fe5536d15c8e179f04d37257032e91660220eb87098d791483965b  remove-musl-root.patch
+c31fdfe8a9b3411576c75da46645cf0465b9053000a2ab49cf9b2f2733f679d6d33acbf236d67a20e14935d094a685453b7f1840180249f39d610fd0902c3125  check-rustc
+"
