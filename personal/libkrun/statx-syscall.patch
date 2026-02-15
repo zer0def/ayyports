@@ -1,0 +1,96 @@
+From b1501c6983ddd16e7c0da4e95231d4d7d4e2a7b3 Mon Sep 17 00:00:00 2001
+From: Pepper Gray <hello@peppergray.xyz>
+Date: Tue, 21 Oct 2025 21:02:01 +0200
+Subject: [PATCH] musl 1.2.5 added support for the statx system call rust ships
+ unknown-linux-musl with musl 1.2.3 milage on other libs may varay
+
+Intermediate solution using forked version of statx-sys
+to replace libc::statx until statx becomes available on musl
+
+Fixes: #431
+Signed-off-by: Pepper Gray <hello@peppergray.xyz>
+---
+ Cargo.lock                                     | 9 +++++++++
+ Cargo.toml                                     | 3 ++-
+ src/devices/Cargo.toml                         | 1 +
+ src/devices/src/virtio/fs/linux/passthrough.rs | 8 ++++----
+ 4 files changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/Cargo.lock b/Cargo.lock
+index ca8b5ebc3..49d92ceb3 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -442,6 +442,7 @@ dependencies = [
+  "polly",
+  "rand",
+  "rutabaga_gfx",
++ "statx-sys",
+  "thiserror 2.0.12",
+  "utils",
+  "virtio-bindings",
+@@ -1592,6 +1593,14 @@ version = "1.1.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+ 
++[[package]]
++name = "statx-sys"
++version = "0.4.1"
++source = "git+https://github.com/peppergrayxyz/statx-sys?rev=c0cd9f6b654279be5b4e37fd06d17004687b2ed7#c0cd9f6b654279be5b4e37fd06d17004687b2ed7"
++dependencies = [
++ "libc",
++]
++
+ [[package]]
+ name = "strum"
+ version = "0.27.2"
+diff --git a/Cargo.toml b/Cargo.toml
+index 20efd17db..02aec4572 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -9,3 +9,6 @@
+ [profile.release]
+ #panic = "abort"
+ lto = true
++ 
++[patch.crates-io]
++statx-sys = { git = "https://github.com/peppergrayxyz/statx-sys", rev = "c0cd9f6b654279be5b4e37fd06d17004687b2ed7" }
+diff --git a/src/devices/Cargo.toml b/src/devices/Cargo.toml
+index cf69d3caa..abcd6ae11 100644
+--- a/src/devices/Cargo.toml
++++ b/src/devices/Cargo.toml
+@@ -40,6 +40,7 @@
+ polly = { path = "../polly" }
+ rutabaga_gfx = { path = "../rutabaga_gfx", features = ["virgl_renderer", "virgl_renderer_next"], optional = true }
+ imago = { version = "0.2.1", features = ["sync-wrappers", "vm-memory"] }
++statx-sys = "0.4.1"
+ 
+ [target.'cfg(target_os = "macos")'.dependencies]
+ hvf = { path = "../hvf" }
+diff --git a/src/devices/src/virtio/fs/linux/passthrough.rs b/src/devices/src/virtio/fs/linux/passthrough.rs
+index 4ed6e4b48..c543d451e 100644
+--- a/src/devices/src/virtio/fs/linux/passthrough.rs
++++ b/src/devices/src/virtio/fs/linux/passthrough.rs
+@@ -147,7 +147,7 @@ fn stat(f: &File) -> io::Result<libc::stat64> {
+ }
+ 
+ fn statx(f: &File) -> io::Result<(libc::stat64, u64)> {
+-    let mut stx = MaybeUninit::<libc::statx>::zeroed();
++    let mut stx = MaybeUninit::<statx_sys::statx>::zeroed();
+ 
+     // Safe because this is a constant value and a valid C string.
+     let pathname = unsafe { CStr::from_bytes_with_nul_unchecked(EMPTY_CSTR) };
+@@ -155,11 +155,11 @@ fn statx(f: &File) -> io::Result<(libc::stat64, u64)> {
+     // Safe because the kernel will only write data in `st` and we check the return
+     // value.
+     let res = unsafe {
+-        libc::statx(
++        statx_sys::statx(
+             f.as_raw_fd(),
+             pathname.as_ptr(),
+-            libc::AT_EMPTY_PATH | libc::AT_SYMLINK_NOFOLLOW,
+-            libc::STATX_BASIC_STATS | libc::STATX_MNT_ID,
++            statx_sys::AT_EMPTY_PATH | statx_sys::AT_SYMLINK_NOFOLLOW,
++            statx_sys::STATX_BASIC_STATS | statx_sys::STATX_MNT_ID,
+             stx.as_mut_ptr(),
+         )
+     };

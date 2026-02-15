@@ -1,0 +1,155 @@
+# Contributor: Bartłomiej Piotrowski <bpiotrowski@alpinelinux.org>
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+maintainer="Patrycja Rosa <alpine@ptrcnull.me>"
+pkgver=21.1.8
+_pkgver="${pkgver//_/-}"
+pkgrel=2
+# NOTE: Upgrade together with the whole LLVM suite.
+_llvmver=${pkgver%%.*}
+_pkgname=lldb
+pkgname="${_pkgname}${_llvmver}"
+pkgdesc="Next generation, high-performance debugger"
+arch="all"
+url="https://llvm.org/"
+license="Apache-2.0"
+depends_dev="$pkgname=$pkgver-r$pkgrel"
+makedepends="
+	clang~$_llvmver
+	clang$_llvmver
+	clang$_llvmver-dev
+	clang$_llvmver-extra-tools
+	clang$_llvmver-static
+	cmake
+	curl-dev
+	doxygen
+	gtest-dev
+	libedit-dev
+	libffi-dev
+	libxml2-dev
+	linux-headers
+	lld$_llvmver
+	lld$_llvmver-libs
+	llvm$_llvmver-dev
+	llvm$_llvmver-gtest
+	llvm$_llvmver-static
+	ncurses-dev
+	py3-sphinx
+	python3-dev
+	samurai
+	swig
+	xz
+	"
+subpackages="$pkgname-dev $pkgname-doc py3-$pkgname:py3"
+#_default_lldb="no"
+#[ "${_default_lldb}" != "yes" ] || subpackages="${subpackages} ${_pkgname}:_default_pkg:noarch ${_pkgname}-dev:_default_dev:noarch py3-${_pkgname}:_default_py3:noarch"
+subpackages="${subpackages} ${_pkgname}:_default_pkg:noarch ${_pkgname}-dev:_default_dev:noarch py3-${_pkgname}:_default_py3:noarch"
+source="https://github.com/llvm/llvm-project/releases/download/llvmorg-$_pkgver/llvm-project-$_pkgver.src.tar.xz
+	py313plus-bringup.patch
+	llvm_slug.py
+	"
+_basedir="$srcdir/llvm-project-$_pkgver.src"
+builddir="$_basedir/lldb"
+options="!check !tracedeps"  # FIXME: enable tests
+
+prepare() {
+	default_prepare
+	# llvm_slug module copied from llvm-19.1.2.src/docs/llvm_slug.py
+	# needed by docs/conf.py
+	install -Dm0755 -t "${_basedir}/llvm/docs/" "${srcdir}/llvm_slug.py"
+}
+
+build() {
+	export CC=clang-$_llvmver
+	export CXX=clang++-$_llvmver
+	export LDFLAGS="$LDFLAGS -fuse-ld=lld"
+
+	case "$CARCH" in
+	arm*)
+		# binutils bugs
+		;;
+	*)
+		export CFLAGS="$CFLAGS -flto"
+		export CXXFLAGS="$CXXFLAGS -flto"
+		;;
+	esac
+
+	cmake --trace -B build -G Ninja -Wno-dev \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_PREFIX=/usr/lib/llvm$_llvmver \
+		-DCMAKE_SKIP_RPATH=ON \
+		-DLLDB_BUILT_STANDALONE=ON \
+		-DLLDB_INCLUDE_TESTS="$(want_check && echo ON || echo OFF)" \
+		-DLLVM_ENABLE_SPHINX=ON \
+		-DLLVM_LINK_LLVM_DYLIB=ON \
+		-DCMAKE_POSITION_INDEPENDENT_CODE=ON
+
+	cmake --build build --target all docs-lldb-man
+}
+
+check() {
+	ninja -v -C build check-lldb
+}
+
+package() {
+	# backtracing/debugging pretty much anything is going to need libc debug symbols
+	# not everything, but the common case needs this, and it's a small dep in comparison
+	depends="musl-dbg"
+
+	DESTDIR="$pkgdir" cmake --install build
+	install -Dm644 build/docs/man/*.1 -t "$pkgdir"/usr/share/man/man1/
+	python3 -m compileall -fq "$pkgdir"/usr/lib/python3*
+
+	mkdir -p "${pkgdir}/usr/bin"
+	for i in $(ls -1 "${pkgdir}/usr/lib/llvm${_llvmver}/bin/"*); do
+		ln -sfv "../lib/llvm${_llvmver}/bin/${i##*/}" "${pkgdir}/usr/bin/${i##*/}${_llvmver}"
+	done
+
+	for i in $(ls -1 "${pkgdir}/usr/lib/llvm${_llvmver}/lib/lib"*.so.*); do
+		ln -sfv "llvm${_llvmver}/lib/${i##*/}" "${pkgdir}/usr/lib/${i##*/}"
+	done
+}
+
+dev() {
+	default_dev
+	mkdir -p "${subpkgdir}/usr/include"
+	ln -sfv "../llvm${_llvmver}/include/lldb" "${subpkgdir}/usr/include/lldb${_llvmver}"
+}
+
+py3() {
+	pkgdesc="Python3 module for LLDB"
+	depends="$pkgname=$pkgver-r$pkgrel python3"
+	#replaces="py-lldb"
+
+	_pylibs="$(readlink -f "${pkgdir}/usr/lib/llvm${_llvmver}/lib/python3"* | head -n1)"
+	mkdir -p "${subpkgdir}/usr/lib/llvm${_llvmver}/lib/${_pylibs##*/}/site-packages" "${subpkgdir}/usr/lib/${_pylibs##*/}/site-packages"
+	mv -v "${_pylibs}/site-packages/lldb" "${subpkgdir}/usr/lib/llvm${_llvmver}/lib/${_pylibs##*/}/site-packages/"
+	ln -sfv "../../llvm${_llvmver}/lib/${_pylibs##*/}/site-packages/lldb" "${subpkgdir}/usr/lib/${_pylibs##*/}/site-packages/lldb${_llvmver}"
+}
+
+_default_pkg() {
+	mkdir -p "${subpkgdir}/usr/bin" "${subpkgdir}/usr/lib"
+	for i in $(ls -1 "${pkgdir}/usr/bin/"*); do
+		_i="${i##*/}"; ln -sfv "${_i}" "${subpkgdir}/usr/bin/${_i/${_llvmver}/}"
+	done
+
+	for i in $(ls -1 "${pkgdir}/usr/lib/llvm${_llvmver}/lib/lib"*.so); do
+		ln -sfv "llvm${_llvmver}/lib/${i##*/}" "${subpkgdir}/usr/lib/${i##*/}"
+	done
+}
+
+_default_dev() {
+	mkdir -p "${subpkgdir}/usr/include"
+	ln -sfv "lldb${_llvmver}" "${subpkgdir}/usr/include/lldb"
+}
+
+_default_py3() {
+	_pylibs="$(readlink -f "${pkgdir}/usr/lib/llvm${_llvmver}/lib/python3"* | head -n1)"
+	mkdir -p "${subpkgdir}/usr/lib/${_pylibs##*/}/site-packages"
+	ln -sfv "lldb${_llvmver}" "${subpkgdir}/usr/lib/${_pylibs##*/}/site-packages/lldb${_llvmver}"
+}
+
+sha512sums="
+cae4c44e7bf678071723da63ad5839491d717a7233e7f4791aa408207f3ea42f52de939ad15189b112c02a0770f1bb8d59bae6ad31ef53417a6eea7770fe52ab  llvm-project-${pkgver}.src.tar.xz
+10c5fd84f184dfe3db895308c315cd5a5efe9e83a384cdbbe3fe249a686be0870874bb4c18f18fc0cb7dafbcf2d7da36cf51c453597480ad0b9ff51b1cb4b493  lldb21/py313plus-bringup.patch
+5b65acf109e4b1e22411216d4b023f9975ea1fb04ec011fa71741fa7d13e3a0f1af2f9d4886782a73172f21c9debadf618fd814db04cfd98462a42b0f39e4c4a  llvm_slug.py
+"

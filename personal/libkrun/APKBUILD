@@ -1,0 +1,35 @@
+pkgname=libkrun
+pkgver=1.17.4
+pkgrel=0
+pkgdesc="A dynamic library providing Virtualization-based process isolation capabilities"
+url='https://github.com/containers/libkrun'
+license="Apache-2.0"
+arch="all"
+makedepends="cargo clang-libclang libcap-ng-dev libepoxy-dev linux-headers patchelf pipewire-dev virglrenderer-dev zstd-dev"
+depends="libkrunfw pipewire virglrenderer"
+options="!check"
+source="https://github.com/containers/libkrun/archive/refs/tags/v$pkgver/$pkgname-$pkgver.tar.gz
+  pipewire-updated-bindgen.patch
+  statx-syscall.patch"  # https://github.com/peppergrayxyz/libkrun/commit/b1501c6983ddd16e7c0da4e95231d4d7d4e2a7b3.patch
+
+prepare() {
+  patch -Np1 -i "${srcdir}/pipewire-updated-bindgen.patch"
+  patch -Np1 -i "${srcdir}/statx-syscall.patch"
+  cargo fetch --target "$(rustc --print host-tuple)"
+}
+
+build() {
+  export ZSTD_SYS_USE_PKG_CONFIG=1
+  make --trace BLK=1 NET=1 EFI=0 GPU=1 SND=1 INPUT=1 VERBOSE=1
+}
+
+package() {
+  make DESTDIR="$pkgdir" PREFIX=/usr LIBDIR_Linux=lib install
+  #install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
+sha512sums="
+6cd83941a245480e97bdc59307af6737af98a92706db6faf6312ac60e54f7e5f8e2ca7268f14911bd9090954329c70f7f3693132af136323b3a3ae290e1fd673  libkrun-${pkgver}.tar.gz
+5c8765d4db98e977950d2e69f19b6698a0bac51c373a19bc03b2d9b66b32161b31f8516e5e54e945cdd00385b904081942cd45debf08a5814e4ebbc06097f5f6  pipewire-updated-bindgen.patch
+283665bf8f85d3cfd43f24ade057614dd8f6a8daffb4ba5e027b3a3b51537ac50996dfc1d489c0798944a7d2859a0b535ae75b7d1b16258a9d0c853c29595c18  statx-syscall.patch
+"

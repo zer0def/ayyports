@@ -1,0 +1,217 @@
+commit 9ea64dd8781328d831d7c69a586f0c84dece1c11
+Author: David Spickett <david.spickett@linaro.org>
+Date:   Wed Jan 29 09:56:41 2025 +0000
+
+    [lldb] Make Python >= 3.8 required for LLDB 21 (#124735)
+    
+    As decided on
+    https://discourse.llvm.org/t/rfc-lets-document-and-enforce-a-minimum-python-version-for-lldb/82731.
+    
+    LLDB 20 recommended `>= 3.8` but did not remove support for anything
+    earlier. Now we are in what will become LLDB 21, so I'm removing that
+    support and making
+    `>= 3.8` required.
+    
+    See https://docs.python.org/3/c-api/apiabiversion.html#c.PY_VERSION_HEX
+    for the format of PY_VERSION_HEX.
+
+diff --git a/source/Plugins/ScriptInterpreter/Python/PythonDataObjects.cpp b/source/Plugins/ScriptInterpreter/Python/PythonDataObjects.cpp
+index a0f8cf954f80..1340425aade4 100644
+--- a/source/Plugins/ScriptInterpreter/Python/PythonDataObjects.cpp
++++ b/source/Plugins/ScriptInterpreter/Python/PythonDataObjects.cpp
+@@ -73,10 +73,8 @@ Expected<std::string> python::As<std::string>(Expected<PythonObject> &&obj) {
+ static bool python_is_finalizing() {
+ #if PY_VERSION_HEX >= 0x030d0000
+   return Py_IsFinalizing();
+-#elif PY_VERSION_HEX >= 0x03070000
+-  return _Py_IsFinalizing();
+ #else
+-  return _Py_Finalizing != nullptr;
++  return _Py_IsFinalizing();
+ #endif
+ }
+ 
+@@ -810,7 +808,6 @@ bool PythonCallable::Check(PyObject *py_obj) {
+   return PyCallable_Check(py_obj);
+ }
+ 
+-#if PY_VERSION_HEX >= 0x03030000
+ static const char get_arg_info_script[] = R"(
+ from inspect import signature, Parameter, ismethod
+ from collections import namedtuple
+@@ -832,15 +829,12 @@ def main(f):
+             raise Exception(f'unknown parameter kind: {kind}')
+     return ArgInfo(count, varargs)
+ )";
+-#endif
+ 
+ Expected<PythonCallable::ArgInfo> PythonCallable::GetArgInfo() const {
+   ArgInfo result = {};
+   if (!IsValid())
+     return nullDeref();
+ 
+-#if PY_VERSION_HEX >= 0x03030000
+-
+   // no need to synchronize access to this global, we already have the GIL
+   static PythonScript get_arg_info(get_arg_info_script);
+   Expected<PythonObject> pyarginfo = get_arg_info(*this);
+@@ -852,57 +846,6 @@ Expected<PythonCallable::ArgInfo> PythonCallable::GetArgInfo() const {
+       cantFail(As<bool>(pyarginfo.get().GetAttribute("has_varargs")));
+   result.max_positional_args = has_varargs ? ArgInfo::UNBOUNDED : count;
+ 
+-#else
+-  PyObject *py_func_obj;
+-  bool is_bound_method = false;
+-  bool is_class = false;
+-
+-  if (PyType_Check(m_py_obj) || PyClass_Check(m_py_obj)) {
+-    auto init = GetAttribute("__init__");
+-    if (!init)
+-      return init.takeError();
+-    py_func_obj = init.get().get();
+-    is_class = true;
+-  } else {
+-    py_func_obj = m_py_obj;
+-  }
+-
+-  if (PyMethod_Check(py_func_obj)) {
+-    py_func_obj = PyMethod_GET_FUNCTION(py_func_obj);
+-    PythonObject im_self = GetAttributeValue("im_self");
+-    if (im_self.IsValid() && !im_self.IsNone())
+-      is_bound_method = true;
+-  } else {
+-    // see if this is a callable object with an __call__ method
+-    if (!PyFunction_Check(py_func_obj)) {
+-      PythonObject __call__ = GetAttributeValue("__call__");
+-      if (__call__.IsValid()) {
+-        auto __callable__ = __call__.AsType<PythonCallable>();
+-        if (__callable__.IsValid()) {
+-          py_func_obj = PyMethod_GET_FUNCTION(__callable__.get());
+-          PythonObject im_self = __callable__.GetAttributeValue("im_self");
+-          if (im_self.IsValid() && !im_self.IsNone())
+-            is_bound_method = true;
+-        }
+-      }
+-    }
+-  }
+-
+-  if (!py_func_obj)
+-    return result;
+-
+-  PyCodeObject *code = (PyCodeObject *)PyFunction_GET_CODE(py_func_obj);
+-  if (!code)
+-    return result;
+-
+-  auto count = code->co_argcount;
+-  bool has_varargs = !!(code->co_flags & CO_VARARGS);
+-  result.max_positional_args =
+-      has_varargs ? ArgInfo::UNBOUNDED
+-                  : (count - (int)is_bound_method) - (int)is_class;
+-
+-#endif
+-
+   return result;
+ }
+ 
+diff --git a/source/Plugins/ScriptInterpreter/Python/ScriptInterpreterPython.cpp b/source/Plugins/ScriptInterpreter/Python/ScriptInterpreterPython.cpp
+index ef3c53ca5698..e78e6068debb 100644
+--- a/source/Plugins/ScriptInterpreter/Python/ScriptInterpreterPython.cpp
++++ b/source/Plugins/ScriptInterpreter/Python/ScriptInterpreterPython.cpp
+@@ -70,8 +70,7 @@ extern "C" PyObject *PyInit__lldb(void);
+ // Don't mess with the signal handlers on Windows.
+ #define LLDB_USE_PYTHON_SET_INTERRUPT 0
+ #else
+-// PyErr_SetInterrupt was introduced in 3.2.
+-#define LLDB_USE_PYTHON_SET_INTERRUPT PY_VERSION_HEX >= 0x03020000
++#define LLDB_USE_PYTHON_SET_INTERRUPT 1
+ #endif
+ 
+ static ScriptInterpreterPythonImpl *GetPythonInterpreter(Debugger &debugger) {
+diff --git a/source/Plugins/ScriptInterpreter/Python/lldb-python.h b/source/Plugins/ScriptInterpreter/Python/lldb-python.h
+index b68598b9d59d..4a6c11dba02e 100644
+--- a/source/Plugins/ScriptInterpreter/Python/lldb-python.h
++++ b/source/Plugins/ScriptInterpreter/Python/lldb-python.h
+@@ -50,8 +50,8 @@ static llvm::Expected<bool> *g_fcxx_modules_workaround [[maybe_unused]];
+ 
+ // Provide a meaningful diagnostic error if someone tries to compile this file
+ // with a version of Python we don't support.
+-static_assert(PY_VERSION_HEX >= 0x03000000,
+-              "LLDB requires at least Python 3.0");
++static_assert(PY_VERSION_HEX >= 0x03080000,
++              "LLDB requires at least Python 3.8");
+ #endif
+ 
+ #endif // LLDB_PLUGINS_SCRIPTINTERPRETER_PYTHON_LLDB_PYTHON_H
+diff --git a/unittests/ScriptInterpreter/Python/PythonDataObjectsTests.cpp b/unittests/ScriptInterpreter/Python/PythonDataObjectsTests.cpp
+index 365ebc8e52c2..2dd92fc00fea 100644
+--- a/unittests/ScriptInterpreter/Python/PythonDataObjectsTests.cpp
++++ b/unittests/ScriptInterpreter/Python/PythonDataObjectsTests.cpp
+@@ -760,10 +760,6 @@ class NewStyle(object):
+     EXPECT_EQ(arginfo.get().max_positional_args, 3u);
+   }
+ 
+-#if PY_VERSION_HEX >= 0x03030000
+-
+-  // the old implementation of GetArgInfo just doesn't work on builtins.
+-
+   {
+     auto builtins = PythonModule::BuiltinsModule();
+     auto hex = As<PythonCallable>(builtins.GetAttribute("hex"));
+@@ -772,8 +768,6 @@ class NewStyle(object):
+     ASSERT_THAT_EXPECTED(arginfo, llvm::Succeeded());
+     EXPECT_EQ(arginfo.get().max_positional_args, 1u);
+   }
+-
+-#endif
+ }
+ 
+ TEST_F(PythonDataObjectsTest, TestScript) {
+
+commit 3686e5b52f2a02c1c19050479d1dd0fd9d1dd4f8
+Author: Jonas Devlieghere <jonas@devlieghere.com>
+Date:   Wed Aug 6 09:06:54 2025 -0700
+
+    [lldb] Eliminate (_)Py_IsFinalizing (NFC) (#152226)
+    
+    Looking at the implementation of `pylifecycle.c` in cpython, finalizing
+    and initialized are set at the same time. Therefore we can eliminate the
+    call to `Py_IsFinalizing` and only check `Py_IsInitialized`, which is
+    part of the stable API.
+    
+    I converted the check to an assert and confirmed that during my test
+    suite runs, we never got into the if block. Because we check before
+    taking the lock, there is an opportunity for a race, but that exact same
+    race exists with the original code.
+
+diff --git a/source/Plugins/ScriptInterpreter/Python/PythonDataObjects.cpp b/source/Plugins/ScriptInterpreter/Python/PythonDataObjects.cpp
+index 82aa022bbae0..27ac54322165 100644
+--- a/source/Plugins/ScriptInterpreter/Python/PythonDataObjects.cpp
++++ b/source/Plugins/ScriptInterpreter/Python/PythonDataObjects.cpp
+@@ -71,24 +71,11 @@ Expected<std::string> python::As<std::string>(Expected<PythonObject> &&obj) {
+   return std::string(utf8.get());
+ }
+ 
+-static bool python_is_finalizing() {
+-#if PY_VERSION_HEX >= 0x030d0000
+-  return Py_IsFinalizing();
+-#else
+-  return _Py_IsFinalizing();
+-#endif
+-}
+-
+ void PythonObject::Reset() {
+   if (m_py_obj && Py_IsInitialized()) {
+-    if (python_is_finalizing()) {
+-      // Leak m_py_obj rather than crashing the process.
+-      // https://docs.python.org/3/c-api/init.html#c.PyGILState_Ensure
+-    } else {
+-      PyGILState_STATE state = PyGILState_Ensure();
+-      Py_DECREF(m_py_obj);
+-      PyGILState_Release(state);
+-    }
++    PyGILState_STATE state = PyGILState_Ensure();
++    Py_DECREF(m_py_obj);
++    PyGILState_Release(state);
+   }
+   m_py_obj = nullptr;
+ }
