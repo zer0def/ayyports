@@ -117,10 +117,10 @@ build() {
 	export CXXFLAGS="$CXXFLAGS -fno-exceptions --sysroot=/usr/share/wasi-sysroot"
 	export CC=clang-$_llvmver CXX=clang++-$_llvmver
 
-	_configure wasm32-wasi build
+	_configure wasm32-wasip1 build
 	cmake --build build
 
-	_configure wasm32-wasi-threads build-threads
+	_configure wasm32-wasip1-threads build-threads
 	cmake --build build-threads
 }
 
@@ -130,16 +130,24 @@ package() {
 	_pkgdir="${pkgdir#*/}"; rm -rfv "${pkgdir}/${_pkgdir%%/*}"
 	mkdir -p "$pkgdir"/usr/share/wasi-sysroot/include/c++/v1
 
-	#cd "$pkgdir"/usr/share/wasi-sysroot/lib
-	#mv -v wasm32-unknown-wasi wasm32-wasi
-	#mv -v wasm32-unknown-wasi-threads wasm32-wasi-threads
+	cd "$pkgdir"/usr/share/wasi-sysroot/lib
+	#mv -v wasm32-unknown-wasi wasm32-wasip1
+	#mv -v wasm32-unknown-wasi-threads wasm32-wasip1-threads
 
 	mv -v "${pkgdir}/usr/share/wasi-sysroot" "${pkgdir}/usr/share/wasi-sysroot${_llvmver}"
 }
 
 _default_pkg() {
-	mkdir -p "${subpkgdir}/usr/share"
-	ln -sfv "wasi-sysroot${_llvmver}" "${subpkgdir}/usr/share/wasi-sysroot"
+	mkdir -p "${subpkgdir}/usr/share/wasi-sysroot/share"
+	for i in wasm32-wasip1 wasm32-wasip1-threads wasm32-wasip2; do
+		mkdir -p "${subpkgdir}/usr/share/wasi-sysroot/include/${i}" "${subpkgdir}/usr/share/wasi-sysroot/lib/${i}"
+		ln -sfv "../../../wasi-sysroot${_llvmver}/include/${i}/c++" "${subpkgdir}/usr/share/wasi-sysroot/include/${i}/c++"
+
+		for j in $(ls -1 "${pkgdir}/usr/share/wasi-sysroot${_llvmver}/lib/${i}/"*); do
+			ln -sfv "../../../wasi-sysroot${_llvmver}/lib/${i}/${j##*/}" "${subpkgdir}/usr/share/wasi-sysroot/lib/${i}/${j##*/}"
+		done
+	done
+	ln -sfv "../../wasi-sysroot${_llvmver}/share/libc++" "${subpkgdir}/usr/share/wasi-sysroot/share/libc++"
 }
 
 sha512sums="

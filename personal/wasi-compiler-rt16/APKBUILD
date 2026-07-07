@@ -21,7 +21,7 @@ makedepends="
 	python3-dev
 	samurai
 	wasi-libc
-	wasi-libcxx$_llvmver
+	wasi-libcxx~$_llvmver
 	zlib-dev
 	"
 source="https://github.com/llvm/llvm-project/releases/download/llvmorg-$pkgver/llvm-project-$pkgver.src.tar.xz
@@ -36,20 +36,24 @@ prepare() {
 	mv "$srcdir"/wasi-sdk-$_wasi_sdk_ver/cmake/Platform cmake
 }
 
-build() {
-	export CFLAGS="$CFLAGS -fno-exceptions --sysroot=/usr/share/wasi-sysroot"
-	export CXXFLAGS="$CXXFLAGS -fno-exceptions --sysroot=/usr/share/wasi-sysroot"
-	export CC=clang-$_llvmver CXX=clang++-$_llvmver
+_configure() {
+	local target="$1"
+	local destdir="$2"
 
-	export CMAKE_C_COMPILER="clang-${_llvmver}" \
-		CMAKE_CXX_COMPILER="clang++-${_llvmver}" \
+	export CMAKE_C_COMPILER="clang-${_llvmver}" CMAKE_CXX_COMPILER="clang++-${_llvmver}" \
 		CMAKE_POLICY_VERSION_MINIMUM=3.5
-	cmake --trace -B build -G Ninja -S compiler-rt -Wno-dev \
+	cmake --trace -B "${destdir}" -G Ninja -S compiler-rt -Wno-dev \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DCMAKE_MODULE_PATH="$builddir"/cmake \
 		-DCMAKE_TOOLCHAIN_FILE="$builddir"/wasi-sdk.cmake \
 		-DCMAKE_C_COMPILER_WORKS=ON \
 		-DCMAKE_CXX_COMPILER_WORKS=ON \
+		-DCMAKE_C_FLAGS="$CFLAGS --target=$target" \
+		-DCMAKE_CXX_FLAGS="$CXXFLAGS --target=$target" \
+		-DCMAKE_ASM_COMPILER_TARGET="$target" \
+		-DCMAKE_CXX_COMPILER_TARGET="$target" \
+		-DCMAKE_C_COMPILER_TARGET="$target" \
+		-DLLVM_DEFAULT_TARGET_TRIPLE="$target" \
 		-DCOMPILER_RT_BAREMETAL_BUILD=ON \
 		-DCOMPILER_RT_INCLUDE_TESTS=OFF \
 		-DCOMPILER_RT_HAS_FPIC_FLAG=OFF \
@@ -60,13 +64,28 @@ build() {
 		-DWASI_SDK_PREFIX=/usr \
 		-DCMAKE_INSTALL_PREFIX=/usr/lib/llvm$_llvmver/lib/clang/$_llvmver/ \
 		-DCMAKE_SYSROOT=/usr/share/wasi-sysroot
-	cmake --build build
+}
+
+build() {
+	export CFLAGS="$CFLAGS -fno-exceptions --sysroot=/usr/share/wasi-sysroot"
+	export CXXFLAGS="$CXXFLAGS -fno-exceptions --sysroot=/usr/share/wasi-sysroot"
+	export CC=clang-$_llvmver CXX=clang++-$_llvmver
+
+	_configure wasm32-wasip1 build; cmake --build build
+	#_configure wasm32-wasip1-threads build-threads; cmake --build build-threads
 }
 
 package() {
 	DESTDIR="$pkgdir" cmake --install build
+	#DESTDIR="$pkgdir" cmake --install build-threads
 
 	rm -r "$pkgdir"/usr/lib/llvm$_llvmver/lib/clang/$_llvmver/include
+	for _p in 1 2; do
+		ln -sfv wasi "$pkgdir"/usr/lib/llvm$_llvmver/lib/clang/$_llvmver/lib/wasm32-wasip$_p
+		ln -sfv wasi "$pkgdir"/usr/lib/llvm$_llvmver/lib/clang/$_llvmver/lib/wasm32-unknown-wasip$_p
+	done
+	ln -sfv libclang_rt.builtins-wasm32.a "$pkgdir"/usr/lib/llvm$_llvmver/lib/clang/$_llvmver/lib/wasi/libclang_rt.builtins.a
+	ln -sfv libclang_rt.profile-wasm32.a "$pkgdir"/usr/lib/llvm$_llvmver/lib/clang/$_llvmver/lib/wasi/libclang_rt.profile.a
 }
 
 sha512sums="
