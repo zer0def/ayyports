@@ -8,8 +8,7 @@
 # Maintainer: team/rust <alpine@ptrcnull.me>
 pkgname=rust
 pkgver=1.97.1
-_mrustc_ver="0.11.2"
-#_mrustc_ver="0.12.0"  # 0df0ad41e646b25664459c92419b88881b139967d36d0601d799d282afb063cb36a73c5476b796d6935e6d886a4709d8efe6442b496c27accf149d7b7b39af42
+_mrustc_ver="0.12.0"
 pkgrel=0
 # Source tarballs for beta releases are listed here:
 # https://static.rust-lang.org/dist/channel-rust-beta.toml
@@ -38,17 +37,17 @@ makedepends_host="
 	!libgit2-dev
 	curl-dev
 	libssh2-dev
-	compiler-rt17 compiler-rt18 compiler-rt19 compiler-rt20 compiler-rt21
-	llvm17-dev llvm18-dev llvm19-dev llvm20-dev llvm21-dev
+	compiler-rt21
+	llvm21-dev
 	openssl-dev
 	sqlite-dev
 	zlib-dev
 	"
 makedepends_build="
 	${makedepends_host}
-	clang17 clang18 clang19 clang20 clang21
+	clang21
 	file
-	llvm17-test-utils llvm18-test-utils llvm19-test-utils llvm20-test-utils llvm21-test-utils
+	llvm21-test-utils
 	python3
 	tar
 	xz-dev
@@ -94,29 +93,12 @@ makedepends_build="
 	"
 makedepends_host="
 	${makedepends_host}
-	scudo-malloc17 scudo-malloc18 scudo-malloc19 scudo-malloc20 scudo-malloc21 scudo-malloc~21
+	scudo-malloc21 scudo-malloc~21
 	"
 #source="https://github.com/thepowersgang/mrustc/archive/v${_mrustc_ver}.tar.gz  # by ← repository state or by release ↓?
 source="https://github.com/thepowersgang/mrustc/archive/refs/tags/v${_mrustc_ver}.tar.gz
-	https://github.com/thepowersgang/mrustc/commit/56e4d7a37155526497354a9a1e500ff9dc8a423d.patch
 	musl-dylib.patch Cargo.toml
 
-	rustc-1.74.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.74.0-src.tar.xz
-	rustc-1.75.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.75.0-src.tar.xz
-	rustc-1.76.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.76.0-src.tar.xz
-	rustc-1.77.2-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.77.2-src.tar.xz
-	rustc-1.78.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.78.0-src.tar.xz
-	rustc-1.79.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.79.0-src.tar.xz
-	rustc-1.80.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.80.1-src.tar.xz
-	rustc-1.81.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.81.0-src.tar.xz
-	rustc-1.82.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.82.0-src.tar.xz
-	rustc-1.83.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.83.0-src.tar.xz
-	rustc-1.84.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.84.1-src.tar.xz
-	rustc-1.85.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.85.1-src.tar.xz
-	rustc-1.86.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.86.0-src.tar.xz
-	rustc-1.87.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.87.0-src.tar.xz
-	rustc-1.88.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.88.0-src.tar.xz
-	rustc-1.89.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.89.0-src.tar.xz
 	rustc-1.90.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.90.0-src.tar.xz
 	rustc-1.91.1-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.91.1-src.tar.xz
 	rustc-1.92.0-src.tar.xz.noextract::https://static.rust-lang.org/dist/rustc-1.92.0-src.tar.xz
@@ -136,8 +118,8 @@ source="https://github.com/thepowersgang/mrustc/archive/refs/tags/v${_mrustc_ver
 	check-rustc
 	"
 #builddir="${srcdir}/rustc-${pkgver}-src"
-_rust_llvm="1.74:17;1.75:17;1.76:17;1.77:18;1.78:18;1.79:18;1.80:18;1.81:18;1.82:19;1.83:19;1.84:19;1.85:19;1.86:20;1.87:20;1.88:21;1.89:21;1.90:21;1.91:21;1.92:21;1.93:21;1.94:21;1.95:21;1.96:21;1.97:21"  # >=1.88:21
-_rust_changeid="1.74.0:0 1.75.0:116881 1.76.0:118703 1.77.2:118703 1.78.0:121754 1.79.0:123711 1.80.1:123711 1.81.0:127866 1.82.0:129295 1.83.0:131075 1.84.1:131075 1.85.1:134650 1.86.0:136941 1.87.0:138986 1.88.0:140732 1.89.0:142379 1.90.0:144675 1.91.1:146435 1.92.0:147888 1.93.1:148911 1.94.1:149354 1.95.0:149354 1.96.1:154508 1.97.1:154587"
+_rust_llvm="1.90:21;1.91:21;1.92:21;1.93:21;1.94:21;1.95:21;1.96:21;1.97:21"  # >=1.88:21
+_rust_changeid="1.90.0:144675 1.91.1:146435 1.92.0:147888 1.93.1:148911 1.94.1:149354 1.95.0:149354 1.96.1:154508 1.97.1:154587"
 
 # secfixes:
 #   1.96.1-r0:
@@ -190,7 +172,7 @@ _clear_vendor_checksums() {
 }
 
 _system_dylib(){
-	_rustc_ver="${1:-1.74.0}"
+	_rustc_ver="${1:-1.90.0}"
 	grep -nr 'crt_static_default\s*=\s*true' "${srcdir}/rustc-${_rustc_ver}-src/compiler/rustc_target/" | awk -F: '/linux/{print $1}' | sort -u | xargs -r -- sed -i 's@\(\s*\)\(\S*crt_static_default\s*=\s*true\)@\1//\2@g'  # disable default static linking on linux targets
 
 	grep -nr 'objects_self_contained' "${srcdir}/rustc-${_rustc_ver}-src/compiler/rustc_target/" | awk -F: '/musl/{print $1}' | sort -u | xargs -r -- sed -i '/self_contained/d'  # musl-specific
@@ -219,7 +201,7 @@ _unpack_build_dist() {
 }
 
 prepare() {
-	patch -Np1 -d "${srcdir}/mrustc-${_mrustc_ver}" -i "${srcdir}/56e4d7a37155526497354a9a1e500ff9dc8a423d.patch"  # mrustc cstdint patch
+	:||patch -Np1 -d "${srcdir}/mrustc-${_mrustc_ver}" -i "${srcdir}/56e4d7a37155526497354a9a1e500ff9dc8a423d.patch"  # mrustc cstdint patch
 }
 
 build() {
@@ -233,7 +215,7 @@ build() {
 	#RUSTFLAGS="${RUSTFLAGS} -Clto=off -Clinker-plugin-lto=off"
 
 	cd "${srcdir}/mrustc-${_mrustc_ver}"
-	export RUSTC_VERSION=1.74.0 MRUSTC_TARGET_VER=1.74 STD_ENV_ARCH="${CARCH}" PARLEVEL="${JOBS:-$(nproc)}"
+	export RUSTC_VERSION=1.90.0 MRUSTC_TARGET_VER=1.90 STD_ENV_ARCH="${CARCH}" PARLEVEL="${JOBS:-$(nproc)}"
 	command -v ccache &>/dev/null && export MRUSTC_CCACHE=1 ||:
 	make --trace bin/mrustc; make --trace -C tools/minicargo/; cp bin/minicargo bin/mrustc "${srcdir}/bin/"
 
@@ -257,7 +239,7 @@ build() {
 		"${srcdir}/mrustc-${_mrustc_ver}/lib/libproc_macro"
 
 	_old_ld_library_path="${LD_LIBRARY_PATH}"
-	export LLVM_CONFIG=/usr/bin/llvm-config-17 CFG_RELEASE_CHANNEL="stable" \
+	export LLVM_CONFIG=/usr/bin/llvm-config-21 CFG_RELEASE_CHANNEL="stable" \
 		LLVM_LINK_SHARED=1 REAL_LIBRARY_PATH_VAR="LD_LIBRARY_PATH" \
 		LD_LIBRARY_PATH="${MRUSTC_LIBDIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" \
 		CFG_RELEASE="${RUSTC_VERSION}" CFG_VERSION="${RUSTC_VERSION}-stable-mrustc" \
@@ -297,7 +279,7 @@ EOF
 	ln -s config "${CARGO_HOME}/config.toml"
 
 	export RUSTC="${srcdir}/bin/rustc" RUSTC_BOOTSTRAP=1 CARGO_HOME="${CARGO_HOME}" \
-		LLVM_CONFIG=/usr/bin/llvm-config-17 LLVM_LINK_SHARED=1 REAL_LIBRARY_PATH_VAR="LD_LIBRARY_PATH" \
+		LLVM_CONFIG=/usr/bin/llvm-config-21 LLVM_LINK_SHARED=1 REAL_LIBRARY_PATH_VAR="LD_LIBRARY_PATH" \
 		RUSTFLAGS='-Z force-unstable-if-unmarked -C link_args=-Wl,-rpath,\$ORIGIN/../lib -C target-feature=-crt-static'
 
 	cargo build --manifest-path "${srcdir}/rustc-${RUSTC_VERSION}-src/library/sysroot/Cargo.toml" \
@@ -779,26 +761,9 @@ _mv() {
 }
 
 sha512sums="
-9a39249c38eee109c4f60af051df89aa5ab1e3408761d67d3ee8ae05cded03b9e4fd36b554a470e35c77d214bf02d39f172ab04fdcb8b03fac068d8af268ebf5  v${_mrustc_ver}.tar.gz
-cdb6dbf79fe34b216b237012d8b6d80520658d9483ce8b93f0d045459b72e2481640fde53b7cb42e2daa5a0a6b640a53923b4a02b9eb0d69cd160cbfdd4d28f6  56e4d7a37155526497354a9a1e500ff9dc8a423d.patch
+0df0ad41e646b25664459c92419b88881b139967d36d0601d799d282afb063cb36a73c5476b796d6935e6d886a4709d8efe6442b496c27accf149d7b7b39af42  v${_mrustc_ver}.tar.gz
 90d36f99b48ccbefe6b250cc3715c3f9a880faf9a668743b795e66fd1d77f6433d048f8beab3d05b090d8b93492d3070224d2da690b781ea344746d7dc7ee888  musl-dylib.patch
 b9c575d8a50b96730576bc9e7a6ec3a54d1cc3ded01f3ec5159d3e59f1e06129e38992bd9a379d2b54e6032c9ed33acb574fadffd9ce8fb99c4657bedace52b9  Cargo.toml
-d949987fab5b7fa4d92910cd4384debd11e598fd2b31d003439dd479977f3389e399d9fd9b43b9a856c54e8777fd10339e169dbb9e87b1a8b07a7ff2ff280c34  rustc-1.74.0-src.tar.xz.noextract
-7b0f25d91b1b5c317980fc88e059200bd43b56a70b445fbc72fb9b96e09775bfd3a98e9bd9d662af80f0ce3aef527c777ee82777e96ca876f47a972d63da8606  rustc-1.75.0-src.tar.xz.noextract
-92e16cfdeb91bde341fe6c2774d92868275b07aa1d46d870ddc9291eadfe4ea9af93e06586fa7d6b8d60534903945cbbe706d354c90272712989c58d2bf174bf  rustc-1.76.0-src.tar.xz.noextract
-ab099a5e545892f145af9f4c21f41693463248697accf1c92d9afbe6c711639c3859e89c1bb99b84854c462784cc5970fb84dd7c89260ff92174e3684f76920c  rustc-1.77.2-src.tar.xz.noextract
-d2fb9881e28849d871fda71b1b51652be3839b3283f0d32163f258c5c707a9fb7b589da8dc03bca2fefee1abdd2b44a5f17e85d8c6df7bea119d1e8d22371941  rustc-1.78.0-src.tar.xz.noextract
-99d7f276292e5c270648473ff73e9888413a3325ef3a4d7a45f8ce77a42ac87996905f1d875888ce084b621f642017bc9e31a00da1439108dbe19b85d0eab085  rustc-1.79.0-src.tar.xz.noextract
-3c746108a86eeb734c1a8c8f63ba1a45e2cb03a8cb553395a167d07dc3ce5d8d9ea365ddd95533b6952d915069b86cad7ad218d27861e0889f8e878136bd32ab  rustc-1.80.1-src.tar.xz.noextract
-b8a837ced521d2ca2c7f228a0640da591384519e4dbc1ae768524d50616da6abbd2f7bdae3777caebc0447dac91bf76481282ce5a2264d7f30e173caa6321a51  rustc-1.81.0-src.tar.xz.noextract
-d158c7c71c1814bde2a3ec3cbeabe34949bd3201b730c0d7ec6baad4158bb28dd13696c430a6b99dc38b9d23ad7ddf8dde7d2487cbfbbbe9c3473016994210f0  rustc-1.82.0-src.tar.xz.noextract
-64db57949c6ac1df6a3f4c6bd0938685a5fb1bc3d318b34ccfcfccb0f9eff1cffd4d8a53a190ef0409eeca9ad12bc6234c2c1de69196cc74ae02d6afa20d0ce6  rustc-1.83.0-src.tar.xz.noextract
-f1cc4765736551508408126e44086988e8ddc30c1a929bf7b61c6be85ad0d65928dd5fb1041cfaeee8eb37d2208f2c1917e276aef2bc9a8e40e34f6713b349e1  rustc-1.84.1-src.tar.xz.noextract
-d61afb4f00d0c63eef132e10ca5369202064ecad8ab5bcf4fbd62e9a20b2bd71840b2a769dadcf43452fc0448865975c9de1c129752caa9928d2757027bacf7c  rustc-1.85.1-src.tar.xz.noextract
-9ce195e24a03765f7163de16271e3d19d731d4b80fcc2bfd919106c9d42543eade018f712f6947ea3c6e57c6cb2e6841596aa668d608b8da15101a7da14f3097  rustc-1.86.0-src.tar.xz.noextract
-2ef08c9be45434401f916d54b3739f52d255f8a3a4ce05a717499250c2333eeaf601f1d18085b878c027c609f44da74d0151f5bfc2c9ae1e01166919a91a1d2b  rustc-1.87.0-src.tar.xz.noextract
-e6c62af2953f49462b2369e9551b12f2bec114577f90e3e76049636da4279b1e7f4d53bc6896f5d0d4715d90ef6d29dacff529a45690ffac6af62ad64600db40  rustc-1.88.0-src.tar.xz.noextract
-3ac0f02baaff12c67fe35cef4d56b315134d0a043bb6103a248a2842456c74733c6e3039f079bacfb8b8ab9b7487f92d678987e588bd41276abf9bf7c2f7870b  rustc-1.89.0-src.tar.xz.noextract
 fb0798b4c7450754db2fcbb641202909d209c6db2d9181d7df7282217b8320dc52f5e9853de9d7bdb79177f1f920389450cab07674dea5fb5501eaab5816662a  rustc-1.90.0-src.tar.xz.noextract
 68b6bebff2e1b3bc5762951bec60f55cb7f23fd516ca85195f8050790f20c6cefdc3c5ffe0c40aa2d34635f48fa01f567874bcea3076ad5c260eae1afd759870  rustc-1.91.1-src.tar.xz.noextract
 a2c0b127933595b9bc2063d7b7c88d9af512c4664b18f29d44c9a6e2c68d194b87a3071717e8f1b7c858ae940baca888e10be95cd31e0201916d0bfc312a3b15  rustc-1.92.0-src.tar.xz.noextract
