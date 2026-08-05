@@ -33,7 +33,7 @@ makedepends="
 	bash
 	cmake
 	elfutils-dev
-	gawk
+	cmd:awk
 	gettext-dev
 	graphviz
 	libtool

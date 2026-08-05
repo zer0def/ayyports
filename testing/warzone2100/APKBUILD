@@ -16,7 +16,7 @@ makedepends="
 	freetype-dev
 	fmt-dev
 	fribidi-dev
-	gawk
+	cmd:awk
 	harfbuzz-dev
 	libpng-dev
 	libsodium-dev

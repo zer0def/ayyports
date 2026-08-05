@@ -36,7 +36,7 @@ makedepends="$depends_dev
 	eudev-dev
 	flex
 	freetds-dev
-	gawk
+	cmd:awk
 	gperf
 	gtk+3.0-dev
 	hicolor-icon-theme

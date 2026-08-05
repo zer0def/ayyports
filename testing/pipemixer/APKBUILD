@@ -13,7 +13,7 @@ makedepends="
 	git
 	pkgconf-dev
 	pipewire-dev
-	gawk
+	cmd:awk
 	ninja
 "
 options="!check" # contains no test suite

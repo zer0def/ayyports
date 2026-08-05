@@ -12,7 +12,7 @@ makedepends="
 	automake
 	bison
 	flex
-	gawk
+	cmd:awk
 	gettext-dev
 	gnu-libiconv-dev
 	libtool

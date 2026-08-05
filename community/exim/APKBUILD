@@ -19,7 +19,7 @@ pkggroups="$pkgname mail"
 depends="ca-certificates"
 makedepends="
 	bash
-	gawk
+	cmd:awk
 	libidn-dev
 	libpq-dev
 	libspf2-dev

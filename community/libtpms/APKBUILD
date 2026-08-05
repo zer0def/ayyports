@@ -7,7 +7,7 @@ pkgdesc="library providing software emulation of a Trusted Platform Module (TPM 
 url="https://github.com/stefanberger/libtpms"
 arch="all"
 license="BSD-3-Clause"
-makedepends="autoconf automake bash gawk libtool make openssl-dev>3"
+makedepends="autoconf automake bash cmd:awk libtool make openssl-dev>3"
 subpackages="$pkgname-dev $pkgname-doc"
 source="$pkgname-$pkgver.tar.gz::https://github.com/stefanberger/libtpms/archive/v$pkgver.tar.gz"
 

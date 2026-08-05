@@ -6,7 +6,7 @@ pkgdesc="Convert flat ASCII text to man page format"
 url="https://github.com/mvertes/txt2man"
 arch="noarch"
 license="GPL-2.0-or-later"
-depends="gawk"
+depends="cmd:awk"
 subpackages="$pkgname-doc"
 source="https://github.com/mvertes/$pkgname/archive/$pkgname-$pkgver.tar.gz
 	makefile.patch"

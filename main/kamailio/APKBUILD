@@ -24,7 +24,7 @@ pkggroups="kamailio"
 arch="all"
 license="GPL-2.0-or-later"
 options="!check" # no testsuite
-depends="gawk"
+depends="cmd:awk"
 makedepends="
 	bison
 	cmake

@@ -10,7 +10,7 @@ license="GPL-3.0-or-later"
 depends="initramfs-generator"
 triggers="grub.trigger=/boot"
 makedepends="autoconf autoconf-archive automake bison bsd-compat-headers flex font-unifont freetype-dev
-	fuse3-dev gawk gettext-dev help2man libtool linux-headers lvm2-dev
+	fuse3-dev cmd:awk gettext-dev help2man libtool linux-headers lvm2-dev
 	python3 xz-dev"
 install="$pkgname.post-upgrade"
 # strip handled by grub Makefiles, abuild strip breaks xen pv-grub

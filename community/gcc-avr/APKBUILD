@@ -9,7 +9,7 @@ url="https://gcc.gnu.org/"
 depends="binutils-avr"
 makedepends="
 	bash
-	gawk
+	cmd:awk
 	gmp-dev
 	isl-dev
 	linux-headers

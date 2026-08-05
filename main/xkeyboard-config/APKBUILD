@@ -9,7 +9,7 @@ license="MIT"
 subpackages="$pkgname-dev $pkgname-doc $pkgname-lang"
 depends_dev="$pkgname"
 makedepends="gettext meson perl libxslt"
-checkdepends="gawk"
+checkdepends="cmd:awk"
 source="https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/-/archive/xkeyboard-config-$pkgver/xkeyboard-config-xkeyboard-config-$pkgver.tar.gz
 	"
 builddir="$srcdir"/xkeyboard-config-xkeyboard-config-$pkgver

@@ -8,7 +8,7 @@ pkgdesc="A local CVE checker tool"
 url="https://github.com/sjvermeu/cvechecker/wiki"
 arch="all"
 license="GPL-3.0-or-later"
-depends="gawk wget libxslt jq"
+depends="cmd:awk wget libxslt jq"
 makedepends="libconfig-dev sqlite-dev mariadb-connector-c-dev
 	argp-standalone autoconf automake libbsd-dev"
 install="$pkgname.pre-install $pkgname.post-install"

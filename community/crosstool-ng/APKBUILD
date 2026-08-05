@@ -16,7 +16,7 @@ depends="
 	file
 	flex
 	g++
-	gawk
+	cmd:awk
 	gperf
 	libtool
 	make

@@ -9,7 +9,7 @@ url="https://libcheck.github.io/check/"
 arch="all"
 license="LGPL-2.1-or-later"
 makedepends="pkgconfig texinfo autoconf automake libtool"
-checkdepends="diffutils gawk"
+checkdepends="diffutils cmd:awk"
 subpackages="$pkgname-doc $pkgname-dev"
 source="https://github.com/libcheck/check/releases/download/$pkgver/check-$pkgver.tar.gz"
 

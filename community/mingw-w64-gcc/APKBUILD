@@ -14,7 +14,7 @@ depends="
 	mingw-w64-winpthreads
 	"
 makedepends="
-	gawk
+	cmd:awk
 	gmp-dev
 	isl-dev
 	mpc1-dev

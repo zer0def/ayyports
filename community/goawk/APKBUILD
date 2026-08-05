@@ -8,7 +8,7 @@ url="https://github.com/benhoyt/goawk"
 arch="all"
 license="MIT"
 makedepends="go"
-checkdepends="coreutils gawk"
+checkdepends="coreutils cmd:awk"
 subpackages="$pkgname-doc"
 source="https://github.com/benhoyt/goawk/archive/v$pkgver/goawk-$pkgver.tar.gz"
 

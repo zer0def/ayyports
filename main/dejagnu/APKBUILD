@@ -10,7 +10,7 @@ arch="noarch"
 license="GPL-3.0-or-later"
 depends="expect"
 makedepends="tcl>=8.5"
-checkdepends="gawk"
+checkdepends="cmd:awk"
 subpackages="$pkgname-dev $pkgname-doc"
 source="https://ftp.gnu.org/pub/gnu/dejagnu/dejagnu-$pkgver.tar.gz"
 
