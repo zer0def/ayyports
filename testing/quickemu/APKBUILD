@@ -14,7 +14,7 @@ depends="
 	coreutils
 	curl
 	edk2
-	gawk
+	cmd:awk
 	grep
 	jq
 	mesa-utils

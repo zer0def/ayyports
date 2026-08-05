@@ -11,7 +11,7 @@ pkgrel=0
 pkgdesc="C++ compilers from the GNU Compiler Collection for embedded targets"
 url="https://gcc.gnu.org/"
 depends="gcc"
-makedepends="bash linux-headers gmp-dev mpfr-dev mpc1-dev zlib-dev isl-dev python3 gawk"
+makedepends="bash linux-headers gmp-dev mpfr-dev mpc1-dev zlib-dev isl-dev python3 cmd:awk"
 # riscv64: limited by gcc-cross-embedded
 arch="all !riscv64"
 license="GPL-3.0-or-later"

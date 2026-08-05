@@ -16,7 +16,7 @@ options="sover-namecheck !archcheck" # arch dependent files moved into subpkgs
 makedepends_build="
 	autoconf
 	bash
-	gawk
+	cmd:awk
 	grep
 	make
 	zip

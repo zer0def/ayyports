@@ -9,7 +9,7 @@ arch="all"
 options="!check"
 license="BSD-3-Clause"
 # strace with libunwind doesn't work right on musl
-makedepends="binutils-dev elfutils-dev gawk linux-headers"
+makedepends="binutils-dev elfutils-dev cmd:awk linux-headers"
 subpackages="$pkgname-doc $pkgname-dbg"
 source="https://github.com/strace/strace/releases/download/v$pkgver/strace-$pkgver.tar.xz
 	off64.patch

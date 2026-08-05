@@ -16,7 +16,7 @@ makedepends="
 	bison
 	dtc
 	flex
-	gawk
+	cmd:awk
 	gnutls-dev
 	linux-headers
 	ncurses-dev

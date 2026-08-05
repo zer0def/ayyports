@@ -34,7 +34,7 @@ makedepends="
 	$makedepends
 	autoconf
 	bash
-	gawk
+	cmd:awk
 	grep
 	make
 	zip

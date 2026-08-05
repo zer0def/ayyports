@@ -9,7 +9,7 @@ arch="noarch"
 license="GPL-3.0-only"
 depends="
 	bash
-	cmd:gawk
+	cmd:awk
 	cmd:pwgen
 	cmd:rofi pass
 	cmd:xclip

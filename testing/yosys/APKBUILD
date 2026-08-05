@@ -16,7 +16,7 @@ makedepends="
 	bison
 	boost-dev
 	flex-dev
-	gawk
+	cmd:awk
 	graphviz-dev
 	libffi-dev
 	lld

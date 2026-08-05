@@ -9,7 +9,7 @@ url="https://www.gnu.org/software/gtypist/gtypist.html"
 arch="all"
 license="GPL-3.0-or-later"
 depends="ncurses perl"
-makedepends="autoconf gengetopt automake gettext-dev texinfo gawk libncursesw ncurses-dev perl help2man"
+makedepends="autoconf gengetopt automake gettext-dev texinfo cmd:awk libncursesw ncurses-dev perl help2man"
 subpackages="$pkgname-doc $pkgname-lang"
 
 # ncursesw.patch: use ncurses in favor of ncursesw, like Arch

@@ -10,7 +10,7 @@ license="GPL-3.0-only"
 depends="
 	bash
 	git
-	gawk
+	cmd:awk
 	"
 options="!check" # No testsuite
 subpackages="

@@ -10,7 +10,7 @@ depends="cpio e2fsprogs"
 makedepends="
 	bash
 	e2fsprogs-dev
-	gawk
+	cmd:awk
 	ocaml
 	ocaml-findlib
 	perl

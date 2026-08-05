@@ -28,7 +28,7 @@ makedepends="
 "
 depends="
 	dmidecode
-	gawk
+	cmd:awk
 	iperf3
 	lm-sensors
 	mesa-utils

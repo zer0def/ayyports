@@ -55,7 +55,7 @@ checkdepends="
 	coreutils
 	curl
 	file
-	gawk
+	cmd:awk
 	jq
 	lttng-tools
 	npm

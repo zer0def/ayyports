@@ -26,7 +26,7 @@ makedepends="
 	findutils
 	fontconfig-dev
 	freetype-dev
-	gawk
+	cmd:awk
 	giflib-dev
 	gtk+3.0-dev
 	java-cacerts

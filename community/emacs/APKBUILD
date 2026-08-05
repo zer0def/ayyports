@@ -15,7 +15,7 @@ makedepends="
 	autoconf
 	automake
 	fontconfig-dev
-	gawk
+	cmd:awk
 	giflib-dev
 	glib-dev
 	gmp-dev

@@ -11,7 +11,7 @@ makedepends="
 	cairo-dev
 	cmake
 	curl-dev
-	gawk
+	cmd:awk
 	glib-dev
 	gperf
 	imlib2-dev

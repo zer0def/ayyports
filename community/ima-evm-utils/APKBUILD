@@ -29,7 +29,7 @@ checkdepends="
 	diffutils
 	e2fsprogs
 	e2fsprogs-extra
-	gawk
+	cmd:awk
 	util-linux-misc
 	"
 subpackages="$pkgname-libs $pkgname-dev $pkgname-doc"

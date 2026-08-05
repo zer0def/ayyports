@@ -26,7 +26,7 @@ makedepends="
 	file-dev
 	flex
 	fuse-dev
-	gawk
+	cmd:awk
 	gperf
 	hivex-dev
 	jansson-dev

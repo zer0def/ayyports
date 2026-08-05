@@ -13,7 +13,7 @@ url="https://hplipopensource.com/"
 license="GPL-2.0-only AND BSD-3-Clause AND MIT"
 makedepends="
 	dbus-dev
-	gawk
+	cmd:awk
 	libjpeg-turbo-dev
 	libusb-dev
 	net-snmp-dev cups-dev

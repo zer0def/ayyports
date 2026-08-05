@@ -20,7 +20,7 @@ makedepends="
 	texinfo
 	"
 checkdepends="
-	gawk
+	cmd:awk
 	gzip
 	"
 subpackages="libltdl-static libltdl $pkgname-doc"

@@ -10,7 +10,7 @@ source="$pkgname-$pkgver.tar.gz::https://git.sr.ht/~anjan/pnc/archive/$pkgver.ta
 license="GPL-3.0-only"
 makedepends="
 	cmake
-	gawk
+	cmd:awk
 	icu-dev
 	libphonenumber-dev
 	samurai
