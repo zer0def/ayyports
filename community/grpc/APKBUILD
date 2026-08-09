@@ -131,8 +131,8 @@ prepare() {
 }
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto -DNDEBUG -O2"
-	export CXXFLAGS="$CXXFLAGS -flto=auto -DNDEBUG -O2"
+	export CFLAGS="$CFLAGS -DNDEBUG -O2"
+	export CXXFLAGS="$CXXFLAGS -DNDEBUG -O2"
 	cmake -B _build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

@@ -40,8 +40,8 @@ builddir="$srcdir/qBittorrent-release-$pkgver"
 #     - CVE-2019-13640
 
 build() {
-	export CFLAGS="$CFLAGS -DNDEBUG -O2 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -DNDEBUG -O2 -flto=auto"
+	export CFLAGS="$CFLAGS -DNDEBUG -O2"
+	export CXXFLAGS="$CXXFLAGS -DNDEBUG -O2"
 
 	cmake -B build-gui -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \

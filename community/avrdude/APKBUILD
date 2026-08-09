@@ -26,7 +26,6 @@ source="
 options="!check" # no tests
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake -B build -G Ninja -Wno-dev \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

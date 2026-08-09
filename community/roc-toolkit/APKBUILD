@@ -50,8 +50,8 @@ _run_scons() {
 build() {
 	# Export cmake minimum version for third-party openfec-1.4.2.9
 	export CMAKE_POLICY_VERSION_MINIMUM=3.5
-	export CFLAGS="$CFLAGS -O2 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -O2 -flto=auto"
+	export CFLAGS="$CFLAGS -O2"
+	export CXXFLAGS="$CXXFLAGS -O2"
 	_run_scons
 }
 

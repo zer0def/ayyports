@@ -34,7 +34,7 @@ replaces="py-pandas" # Backwards compatibility
 provides="py-pandas=$pkgver-r$pkgrel" # Backwards compatibility
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto -O3 -std=gnu99"
+	export CFLAGS="$CFLAGS -O3 -std=gnu99"
 	gpep517 build-wheel \
 		--wheel-dir .dist \
 		--output-fd 3 3>&1 >&2

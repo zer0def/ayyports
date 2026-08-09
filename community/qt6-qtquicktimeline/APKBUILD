@@ -33,8 +33,8 @@ esac
 source="https://download.qt.io/$_rel/qt/${pkgver%.*}/${pkgver/_/-}/submodules/qtquicktimeline-everywhere-src-${pkgver/_/-}.tar.xz"
 
 build() {
-	export CFLAGS="$CFLAGS -g1 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -g1 -flto=auto"
+	export CFLAGS="$CFLAGS -g1"
+	export CXXFLAGS="$CXXFLAGS -g1"
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 		-DCMAKE_INSTALL_PREFIX=/usr

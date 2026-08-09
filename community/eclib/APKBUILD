@@ -14,7 +14,7 @@ subpackages="$pkgname-static $pkgname-dev $pkgname-libs $pkgname-doc"
 source="https://github.com/JohnCremona/eclib/releases/download/$pkgver/eclib-$pkgver.tar.bz2"
 
 build() {
-	CXXFLAGS="${CXXFLAGS//-Os/-O2} -flto=auto" \
+	CXXFLAGS="${CXXFLAGS//-Os/-O2}" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

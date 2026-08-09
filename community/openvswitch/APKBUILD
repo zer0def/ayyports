@@ -63,7 +63,6 @@ options="!check" # random failed
 #     - CVE-2020-10724
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--prefix=/usr \
 		--host=$CHOST \

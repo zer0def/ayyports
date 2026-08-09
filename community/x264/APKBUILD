@@ -49,7 +49,7 @@ build() {
 
 	# note: not autotools
 	pkgver=$pkgver \
-	CFLAGS="${CFLAGS/-Os/} -flto=auto" ./configure \
+	CFLAGS="${CFLAGS/-Os/}" ./configure \
 		--host=$CHOST \
 		--prefix=/usr \
 		--enable-lto \

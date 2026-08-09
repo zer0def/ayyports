@@ -156,8 +156,8 @@ build() {
 	*) arch_opts="$arch_opts --enable-wayland" ;;
 	esac
 
-	CFLAGS="$CFLAGS -fcommon -O2 -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto -O2" \
+	CFLAGS="$CFLAGS -fcommon -O2" \
+	CXXFLAGS="$CXXFLAGS -O2" \
 	LUA=lua5.2 \
 	LUAC=luac5.2 \
 	./configure \

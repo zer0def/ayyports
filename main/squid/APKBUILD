@@ -108,7 +108,7 @@ prepare() {
 }
 
 build() {
-	CXXFLAGS="$CXXFLAGS -O2 -flto=auto" \
+	CXXFLAGS="$CXXFLAGS -O2" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

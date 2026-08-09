@@ -11,8 +11,8 @@ subpackages="$pkgname-dev"
 source="$pkgname-$pkgver.tar.gz::https://github.com/google/double-conversion/archive/v$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -O2 -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -O2 -flto=auto" \
+	CFLAGS="$CFLAGS -O2" \
+	CXXFLAGS="$CXXFLAGS -O2" \
 	cmake3.5 -B build -G Ninja \
 		-DBUILD_TESTING=ON \
 		-DCMAKE_BUILD_TYPE=None \

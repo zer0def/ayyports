@@ -19,8 +19,7 @@ source="https://github.com/protobuf-c/protobuf-c/releases/download/v$pkgver/prot
 #     - CVE-2021-3121
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -std=c++17 -flto=auto" \
+	CXXFLAGS="$CXXFLAGS -std=c++17" \
 	./configure \
 		--prefix=/usr \
 		--sysconfdir=/etc \

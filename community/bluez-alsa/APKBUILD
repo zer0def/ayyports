@@ -58,7 +58,6 @@ build() {
 	*) _enable_ldac="--enable-ldac" ;;
 	esac
 
-	CFLAGS="$CFLAGS -flto=auto" \
 		./configure \
 		--host=$CHOST \
 		--build=$CBUILD \

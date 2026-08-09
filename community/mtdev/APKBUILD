@@ -12,7 +12,6 @@ subpackages="$pkgname-dev"
 source="http://bitmath.org/code/mtdev/mtdev-$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

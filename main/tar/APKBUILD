@@ -29,7 +29,7 @@ source="https://ftp.gnu.org/gnu/tar/tar-$pkgver.tar.xz
 #     - CVE-2021-37701
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
+	FORCE_UNSAFE_CONFIGURE=1 \
 	gl_cv_func_gettimeofday_clobber=no \
 	gl_cv_func_tzset_clobber=no \
 	./configure \

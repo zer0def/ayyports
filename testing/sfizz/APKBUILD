@@ -50,8 +50,8 @@ prepare() {
 }
 
 build() {
-	CFLAGS="$CFLAGS -O2 -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -O2 -flto=auto -Wno-sign-compare -U_FORTIFY_SOURCE" \
+	CFLAGS="$CFLAGS -O2" \
+	CXXFLAGS="$CXXFLAGS -O2 -Wno-sign-compare -U_FORTIFY_SOURCE" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

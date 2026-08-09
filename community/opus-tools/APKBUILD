@@ -25,7 +25,6 @@ prepare() {
 
 build() {
 	CPPFLAGS="$CPPFLAGS -D__opus_check_int=opus_check_int -D__opus_check_int_ptr=opus_check_int_ptr" \
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

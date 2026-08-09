@@ -89,7 +89,6 @@ source="https://www.tcpdump.org/release/tcpdump-$pkgver.tar.gz"
 #     - CVE-2017-11108
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr

@@ -39,7 +39,6 @@ options="!check"  # requires namespaces support and root
 #     - CVE-2019-20795
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
 	make V=1
 }
 

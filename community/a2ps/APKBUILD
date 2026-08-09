@@ -24,7 +24,6 @@ source="https://ftp.gnu.org/gnu/a2ps/a2ps-$pkgver.tar.gz
 	"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

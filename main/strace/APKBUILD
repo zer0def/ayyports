@@ -20,7 +20,6 @@ source="https://github.com/strace/strace/releases/download/v$pkgver/strace-$pkgv
 	"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

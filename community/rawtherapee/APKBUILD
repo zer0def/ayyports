@@ -35,7 +35,6 @@ subpackages="$pkgname-doc $pkgname-dbg"
 source="https://rawtherapee.com/shared/source/rawtherapee-$pkgver.tar.xz"
 
 build() {
-	export CXXFLAGS="$CXXFLAGS -flto=auto"
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX=/usr \

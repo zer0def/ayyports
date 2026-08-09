@@ -30,7 +30,7 @@ subpackages="
 source="$pkgname-$pkgver.tar.gz::https://github.com/Genivia/ugrep/archive/refs/tags/v$pkgver.tar.gz"
 
 build() {
-	CXXFLAGS="${CXXFLAGS//-Os/-O2} -flto=auto" \
+	CXXFLAGS="${CXXFLAGS//-Os/-O2}" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

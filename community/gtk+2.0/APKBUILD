@@ -66,7 +66,7 @@ prepare() {
 }
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto -fpermissive" \
+	CFLAGS="$CFLAGS -fpermissive" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

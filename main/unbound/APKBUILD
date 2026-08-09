@@ -114,7 +114,6 @@ source="https://unbound.net/downloads/unbound-$pkgver.tar.gz
 #     - CVE-2026-55991
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
 
 	PYTHON_VERSION=3 ./configure \
 		--build="$CBUILD" \

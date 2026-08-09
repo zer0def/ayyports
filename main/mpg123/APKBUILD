@@ -17,7 +17,6 @@ source="https://www.mpg123.org/download/mpg123-$pkgver.tar.bz2"
 #     - CVE-2024-10573
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

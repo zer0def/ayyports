@@ -63,8 +63,8 @@ source="https://xpra.org/src/xpra-$pkgver.tar.xz
 	"
 
 build() {
-	CFLAGS="$CFLAGS -O2 -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -O2 -flto=auto" \
+	CFLAGS="$CFLAGS -O2" \
+	CXXFLAGS="$CXXFLAGS -O2" \
 	python3 setup.py build \
 		--with-bundle_tests
 }

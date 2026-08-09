@@ -14,8 +14,6 @@ source="https://github.com/vamp-plugins/vamp-plugin-sdk/archive/refs/tags/vamp-p
 builddir="$srcdir/vamp-plugin-sdk-vamp-plugin-sdk-v${pkgver%.0}"
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -flto=auto"
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

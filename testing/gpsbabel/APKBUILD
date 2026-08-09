@@ -25,8 +25,8 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/GPSBabel/gpsbabel/archive/re
 builddir="$srcdir/gpsbabel-gpsbabel_${pkgver//./_}"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto -O2" \
-	CXXFLAGS="$CXXFLAGS -flto=auto -O2" \
+	CFLAGS="$CFLAGS -O2" \
+	CXXFLAGS="$CXXFLAGS -O2" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

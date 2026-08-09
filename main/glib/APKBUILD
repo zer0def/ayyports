@@ -66,7 +66,7 @@ replaces="gobject-introspection<1.80.0"
 #     - CVE-2019-12450
 
 build() {
-	export CFLAGS="$CFLAGS -ffat-lto-objects -O2"
+	export CFLAGS="$CFLAGS -O2"
 	export CXXFLAGS="$CXXFLAGS -O2"
 	export CPPFLAGS="$CPPFLAGS -O2"
 	local _prefix="$PWD/boostrap-glib"

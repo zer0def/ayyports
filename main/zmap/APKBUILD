@@ -24,7 +24,6 @@ subpackages="$pkgname-doc"
 source="$pkgname-$pkgver.tar.gz::https://github.com/zmap/zmap/archive/refs/tags/v$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake -B . -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DBUILD_SHARED_LIBS=True \

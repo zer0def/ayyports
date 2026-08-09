@@ -16,7 +16,6 @@ source="https://downloads.sourceforge.net/project/sshguard/sshguard/$pkgver/sshg
 	"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

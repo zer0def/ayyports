@@ -14,8 +14,6 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/OpenVisualCloud/SVT-VP9/arch
 builddir="$srcdir/SVT-VP9-$pkgver"
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=lib \

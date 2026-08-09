@@ -39,7 +39,6 @@ replaces="sudo-ldap"
 #     - CVE-2017-1000368
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

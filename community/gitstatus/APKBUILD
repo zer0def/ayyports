@@ -53,7 +53,7 @@ prepare() {
 #  and instead replicate it here with some changes.
 build() {
 	# Flags copied from gitstatus' build script (except -flto).
-	local common_cflags="-fno-plt -Wformat -Werror=format-security -fstack-clash-protection -flto=auto"
+	local common_cflags="-fno-plt -Wformat -Werror=format-security -fstack-clash-protection"
 
 	export CFLAGS="${CFLAGS/-Os/-O2} $common_cflags"
 

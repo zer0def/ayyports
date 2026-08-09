@@ -21,8 +21,6 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/fcitx/fcitx5-rime/archive/re
 options="!check" # no tests
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr

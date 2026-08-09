@@ -32,8 +32,8 @@ builddir="$srcdir/$pkgname-$_gitrev"
 #     - CVE-2026-41445
 
 build() {
-	CFLAGS="$CFLAGS -O2 -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -O2 -flto=auto" \
+	CFLAGS="$CFLAGS -O2" \
+	CXXFLAGS="$CXXFLAGS -O2" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

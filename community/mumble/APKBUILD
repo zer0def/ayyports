@@ -55,8 +55,6 @@ source="https://github.com/mumble-voip/mumble/releases/download/v$pkgver/mumble-
 #     - CVE-2018-20743
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=lib \

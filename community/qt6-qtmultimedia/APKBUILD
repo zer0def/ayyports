@@ -60,8 +60,8 @@ builddir="$srcdir/qtmultimedia-everywhere-src-${pkgver/_/-}"
 build() {
 	# alsa disabled due to build failure for now
 	# src/multimedia/platform/alsa/qalsaaudiosink.cpp:270:5: error: 'timeStamp' was not declared in this scope
-	export CFLAGS="$CFLAGS -g1 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -g1 -flto=auto"
+	export CFLAGS="$CFLAGS -g1"
+	export CXXFLAGS="$CXXFLAGS -g1"
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 		-DCMAKE_INSTALL_PREFIX=/usr \

@@ -17,7 +17,6 @@ subpackages="$pkgname-dev $pkgname-doc xorriso:_xorriso"
 source="https://files.libburnia-project.org/releases/libisoburn-$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

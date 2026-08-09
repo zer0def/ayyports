@@ -32,8 +32,6 @@ build() {
 }
 
 _build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B $pkgname-$1 -G Ninja \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DCMAKE_INSTALL_PREFIX=/usr \

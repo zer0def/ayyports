@@ -39,7 +39,7 @@ build() {
 	unset CFLAGS # all sources C++ but passes both
 	# Breaks build since upstream passes -Wno-format,
 	# annotated: "Use of %llx, which is supported by _UCRT, false positive"
-	CXXFLAGS="${CXXFLAGS/-Werror=format-security} -flto=auto" \
+	CXXFLAGS="${CXXFLAGS/-Werror=format-security}" \
 	python3 ./build/gen.py \
 		--no-last-commit-position \
 		--no-static-libstdc++ \

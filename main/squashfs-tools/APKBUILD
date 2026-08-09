@@ -26,8 +26,8 @@ options="!check" # no testsuite
 #     - CVE-2021-40153
 
 build() {
-	CFLAGS="$CFLAGS -O2 -flto=auto"\
-	CPPFLAGS="$CPPFLAGS -O2 -flto=auto" \
+	CFLAGS="$CFLAGS -O2"\
+	CPPFLAGS="$CPPFLAGS -O2" \
 		make -C squashfs-tools XZ_SUPPORT=1 LZO_SUPPORT=1 LZ4_SUPPORT=1 ZSTD_SUPPORT=1
 }
 

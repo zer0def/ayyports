@@ -36,7 +36,6 @@ builddir="$srcdir/$_pkgname-$pkgver"
 #     - CVE-2021-28957
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
 	gpep517 build-wheel \
 		--wheel-dir .dist \
 		--config-json '{"--build-option": ["--with-cython"]}' \

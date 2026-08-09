@@ -32,9 +32,9 @@ source="zstd-$pkgver.tar.gz::https://github.com/facebook/zstd/archive/v$pkgver.t
 #     - CVE-2019-11922
 
 build() {
-	export CFLAGS="${CFLAGS/-Os/-O3} -flto=auto -ffat-lto-objects"
-	export CXXFLAGS="${CXXFLAGS/-Os/-O3} -flto=auto -ffat-lto-objects"
-	export CPPFLAGS="${CPPFLAGS/-Os/-O3} -flto=auto -ffat-lto-objects"
+	export CFLAGS="${CFLAGS/-Os/-O3}"
+	export CXXFLAGS="${CXXFLAGS/-Os/-O3}"
+	export CPPFLAGS="${CPPFLAGS/-Os/-O3}"
 	local pgo=false
 	if [ -z "$BOOTSTRAP" ]; then
 		pgo=true

@@ -51,7 +51,7 @@ source="https://github.com/OpenPrinting/cups-filters/releases/download/$pkgver/c
 #     - CVE-2023-24805
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto -std=c++17" \
+	CXXFLAGS="$CXXFLAGS -std=c++17" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

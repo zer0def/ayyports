@@ -93,7 +93,7 @@ options="!check" # very flaky
 #     - CVE-2019-10193
 
 build() {
-	export CFLAGS="$CFLAGS -DUSE_MALLOC_USABLE_SIZE -O2 -flto=auto"
+	export CFLAGS="$CFLAGS -DUSE_MALLOC_USABLE_SIZE -O2"
 	make USE_JEMALLOC=no \
 		MALLOC=libc \
 		BUILD_TLS=yes \

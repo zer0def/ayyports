@@ -37,8 +37,8 @@ source="https://pypi.python.org/packages/source/p/pyqt6/pyqt6-$pkgver.tar.gz"
 builddir="$srcdir/pyqt6-$pkgver"
 
 build() {
-	export CFLAGS="$CFLAGS -O2 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -O2 -flto=auto"
+	export CFLAGS="$CFLAGS -O2"
+	export CXXFLAGS="$CXXFLAGS -O2"
 	sip-build \
 		--confirm-license \
 		--qmake /usr/lib/qt6/bin/qmake \

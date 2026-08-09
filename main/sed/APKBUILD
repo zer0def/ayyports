@@ -15,7 +15,6 @@ source="https://ftp.gnu.org/pub/gnu/sed/sed-$pkgver.tar.xz
 	"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

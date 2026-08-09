@@ -46,8 +46,8 @@ x86)
 esac
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto -I/usr/include/gnu-libiconv"
-	export CXXFLAGS="$CXXFLAGS -flto=auto -I/usr/include/gnu-libiconv"
+	export CFLAGS="$CFLAGS -I/usr/include/gnu-libiconv"
+	export CXXFLAGS="$CXXFLAGS -I/usr/include/gnu-libiconv"
 	_build build-nogui -DENABLE_GUI=OFF -DBUILD_TESTING=OFF
 	_build build -DENABLE_GUI=ON -DBUILD_TESTING="$(want_check && echo ON || echo OFF)"
 }

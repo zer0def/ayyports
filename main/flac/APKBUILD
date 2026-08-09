@@ -19,8 +19,8 @@ source="https://downloads.xiph.org/releases/flac/flac-$pkgver.tar.xz"
 #     - CVE-2017-6888
 
 build() {
-	export CFLAGS="$CFLAGS -O3 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -O3 -flto=auto"
+	export CFLAGS="$CFLAGS -O3"
+	export CXXFLAGS="$CXXFLAGS -O3"
 
 	# Shared
 	cmake -B build -G Ninja \

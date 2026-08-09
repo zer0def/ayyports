@@ -52,7 +52,6 @@ build() {
 	# MEGAsdk still uses autohells for Linux builds and they don't provide
 	# install task for cmake.
 	# FIXME: the test suite crashes on a libstdc++ assertion. this means something is broken!
-	CXXFLAGS="$CXXFLAGS -flto=auto"  \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

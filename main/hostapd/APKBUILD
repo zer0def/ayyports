@@ -78,8 +78,6 @@ prepare() {
 }
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
-
 	make all nt_password_hash
 }
 

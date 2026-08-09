@@ -45,7 +45,6 @@ source="https://github.com/storaged-project/udisks/releases/download/udisks-$pkg
 builddir="$srcdir"/udisks-$pkgver
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

@@ -23,8 +23,8 @@ builddir="$srcdir/vapoursynth-$_pkgver"
 
 build() {
 	# fails with lto due to fortify-headers
-	export CFLAGS="$CFLAGS -O2 -flto=auto -U_FORTIFY_SOURCE"
-	export CXXFLAGS="$CXXFLAGS -O2 -flto=auto -U_FORTIFY_SOURCE"
+	export CFLAGS="$CFLAGS -O2 -U_FORTIFY_SOURCE"
+	export CXXFLAGS="$CXXFLAGS -O2 -U_FORTIFY_SOURCE"
 
 	gpep517 build-wheel \
 		--wheel-dir .dist \

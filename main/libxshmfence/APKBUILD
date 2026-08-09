@@ -12,7 +12,6 @@ subpackages="$pkgname-dev"
 source="https://www.x.org/releases/individual/lib/libxshmfence-$pkgver.tar.xz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

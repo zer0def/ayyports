@@ -69,7 +69,6 @@ prepare() {
 
 build() {
 	cp  rrsync.1 support/rrsync.1
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

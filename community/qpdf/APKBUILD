@@ -39,8 +39,6 @@ source="https://github.com/qpdf/qpdf/releases/download/v$pkgver/qpdf-$pkgver.tar
 #     - CVE-2017-12595
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=lib \

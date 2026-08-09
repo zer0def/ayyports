@@ -36,7 +36,7 @@ build() {
 	# broken on 64 bit. Avoid using it.
 	# https://lists.gnu.org/archive/html/bug-coreutils/2024-08/msg00021.html
 	fu_cv_sys_stat_statvfs=n \
-	CFLAGS="$CFLAGS -I/usr/include/utmps -flto=auto" \
+	CFLAGS="$CFLAGS -I/usr/include/utmps" \
 	LIBS="-lutmps -lskarnet" \
 	CONFIG_SHELL=/bin/bash \
 	./configure \

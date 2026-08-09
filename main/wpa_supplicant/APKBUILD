@@ -66,7 +66,6 @@ prepare() {
 }
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
 	cd "$builddir"/wpa_supplicant
 	make LIBDIR=/lib BINDIR=/sbin
 	make LIBDIR=/lib BINDIR=/sbin eapol_test

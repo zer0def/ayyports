@@ -165,7 +165,7 @@ prepare() {
 }
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto -std=gnu89"
+	export CFLAGS="$CFLAGS -std=gnu89"
 	# https://bugs.ghostscript.com/show_bug.cgi?id=708608
 
 	# build ijs

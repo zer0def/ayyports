@@ -25,7 +25,7 @@ source="https://www.dns-oarc.net/files/dnsperf/dnsperf-$pkgver.tar.gz
 	"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L" \
+	CFLAGS="$CFLAGS -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

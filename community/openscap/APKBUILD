@@ -51,7 +51,6 @@ source="https://github.com/OpenSCAP/openscap/releases/download/$pkgver/openscap-
 
 build() {
 	export LIBS=-lfts
-	export CFLAGS="$CFLAGS -flto=auto"
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=lib \

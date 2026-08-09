@@ -33,8 +33,6 @@ prepare() {
 }
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -flto=auto"
 
 	cd "$_clidir"
 	./configure \

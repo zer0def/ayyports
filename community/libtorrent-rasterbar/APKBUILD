@@ -22,7 +22,7 @@ arm*|x86)
 esac
 
 build() {
-	CXXFLAGS="$CXXFLAGS -O2 -DNDEBUG -flto=auto" \
+	CXXFLAGS="$CXXFLAGS -O2 -DNDEBUG" \
 	cmake -B build-shared -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_CXX_STANDARD=17 \

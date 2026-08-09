@@ -55,8 +55,8 @@ builddir="$srcdir/wxWidgets-$pkgver"
 options="!check !spdx"
 
 build() {
-	export CFLAGS="$CFLAGS -g1 -O2 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -g1 -O2 -flto=auto"
+	export CFLAGS="$CFLAGS -g1 -O2"
+	export CXXFLAGS="$CXXFLAGS -g1 -O2"
 
 	cmake -B build-gtk3 -G Ninja -Wno-dev \
 		-DCMAKE_INSTALL_PREFIX=/usr \

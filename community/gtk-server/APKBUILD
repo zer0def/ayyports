@@ -20,7 +20,7 @@ prepare() {
 }
 
 build() {
-	CFLAGS="$CFLAGS -fPIC -flto=auto" \
+	CFLAGS="$CFLAGS -fPIC" \
 	./configure \
 		--prefix=/usr \
 		--sysconfdir=/etc \

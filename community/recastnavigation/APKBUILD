@@ -18,7 +18,7 @@ subpackages="
 source="$pkgname-$pkgver.tar.gz::https://github.com/recastnavigation/recastnavigation/archive/refs/tags/v$pkgver.tar.gz"
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto -DNDEBUG" \
+	CXXFLAGS="$CXXFLAGS -DNDEBUG" \
 	cmake3.5 -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

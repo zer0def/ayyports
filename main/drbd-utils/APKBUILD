@@ -32,8 +32,6 @@ source="https://pkg.linbit.com/downloads/drbd/utils/drbd-utils-$pkgver.tar.gz
 	"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	./configure \
 		--host=$CHOST \
 		--build=$CBUILD \

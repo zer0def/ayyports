@@ -69,8 +69,8 @@ esac
 
 build() {
 	export LLVM_INSTALL_DIR=/usr/lib/llvm$_llvmver
-	CFLAGS="$CFLAGS $(pkg-config --cflags python3-embed) -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -I/usr/lib/llvm$_llvmver/include -flto=auto" \
+	CFLAGS="$CFLAGS $(pkg-config --cflags python3-embed)" \
+	CXXFLAGS="$CXXFLAGS -I/usr/lib/llvm$_llvmver/include" \
 	cmake -B build -G Ninja -Wno-dev \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 		-DCMAKE_INSTALL_PREFIX=/usr \

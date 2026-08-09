@@ -32,7 +32,6 @@ source="https://github.com/libass/libass/releases/download/$pkgver/libass-$pkgve
 #     - GHSA-5gf7-wjfm-vmvm
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

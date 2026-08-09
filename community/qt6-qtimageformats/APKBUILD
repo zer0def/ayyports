@@ -33,8 +33,8 @@ builddir="$srcdir/qtimageformats-everywhere-src-${pkgver/_/-}"
 #     - CVE-2023-4863
 
 build() {
-	export CFLAGS="$CFLAGS -g1 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -g1 -flto=auto"
+	export CFLAGS="$CFLAGS -g1"
+	export CXXFLAGS="$CXXFLAGS -g1"
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 		-DCMAKE_INSTALL_PREFIX=/usr

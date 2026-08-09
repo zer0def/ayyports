@@ -54,8 +54,8 @@ source="https://znc.in/releases/archive/znc-$pkgver.tar.gz
 #     - CVE-2018-14056
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto -DNDEBUG -D_GNU_SOURCE"
-	export CXXFLAGS="$CXXFLAGS -flto=auto -DNDEBUG -Wno-deprecated-declarations"
+	export CFLAGS="$CFLAGS -DNDEBUG -D_GNU_SOURCE"
+	export CXXFLAGS="$CXXFLAGS -DNDEBUG -Wno-deprecated-declarations"
 
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \

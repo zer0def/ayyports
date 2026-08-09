@@ -57,7 +57,7 @@ prepare() {
 }
 
 build() {
-	export CXXFLAGS="$CXXFLAGS -U_FORTIFY_SOURCE -flto=auto"
+	export CXXFLAGS="$CXXFLAGS -U_FORTIFY_SOURCE"
 
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \

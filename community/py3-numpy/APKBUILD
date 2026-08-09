@@ -37,8 +37,8 @@ builddir="$srcdir/numpy-$pkgver"
 export Atlas=None
 # numpy is a huge library (~26 MiB) optimized for performance, so compiling
 # with -Os to sacrifice performance for ~1 MiB doesn't make sense.
-export CFLAGS="${CFLAGS/-Os/-O3} -flto=auto"
-export CXXFLAGS="${CXXFLAGS/-Os/-O3} -flto=auto"
+export CFLAGS="${CFLAGS/-Os/-O3}"
+export CXXFLAGS="${CXXFLAGS/-Os/-O3}"
 
 prepare() {
 	default_prepare

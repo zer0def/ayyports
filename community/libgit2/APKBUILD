@@ -54,7 +54,6 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/libgit2/libgit2/archive/v$pk
 #     - CVE-2016-8569
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake -B build-shared -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

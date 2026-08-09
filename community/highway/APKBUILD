@@ -22,8 +22,6 @@ case "$CARCH" in
 esac
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -flto=auto"
 
 	CFLAGS="$CFLAGS -O2 -DNDEBUG" \
 	CXXFLAGS="$CXXFLAGS -O2 -DNDEBUG" \

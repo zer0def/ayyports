@@ -35,7 +35,6 @@ prepare() {
 
 build() {
 	LIBS="$LIBS -lstdc++fs" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

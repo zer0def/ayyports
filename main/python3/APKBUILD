@@ -152,7 +152,6 @@ build() {
 		--enable-loadable-sqlite-extensions \
 		--enable-optimizations \
 		--enable-shared \
-		--with-lto \
 		--with-computed-gotos \
 		--with-system-expat \
 		--with-system-libmpdec \

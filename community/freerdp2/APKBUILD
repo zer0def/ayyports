@@ -89,7 +89,7 @@ provides="freerdp-plugins=$pkgver-r$pkgrel"
 #     - CVE-2018-8789
 
 build() {
-	export CFLAGS="$CFLAGS -D_BSD_SOURCE -flto=auto"
+	export CFLAGS="$CFLAGS -D_BSD_SOURCE"
 	cmake3.5 -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DCMAKE_INSTALL_PREFIX=/usr \

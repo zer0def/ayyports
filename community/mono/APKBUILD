@@ -35,8 +35,8 @@ source="https://dl.winehq.org/mono/sources/mono/mono-$pkgver.tar.xz
 options="!check" # fail
 
 build() {
-	CFLAGS="$CFLAGS -O2 -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -O2 -flto=auto" \
+	CFLAGS="$CFLAGS -O2" \
+	CXXFLAGS="$CXXFLAGS -O2" \
 	LDFLAGS="$LDFLAGS -lucontext" \
 	./configure \
 		--build=$CBUILD \

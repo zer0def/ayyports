@@ -33,8 +33,8 @@ prepare() {
 
 build() {
 	# better math opts
-	export CFLAGS="$CFLAGS -O3 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -O3 -flto=auto"
+	export CFLAGS="$CFLAGS -O3"
+	export CXXFLAGS="$CXXFLAGS -O3"
 
 	./configure \
 		--build=$CBUILD \

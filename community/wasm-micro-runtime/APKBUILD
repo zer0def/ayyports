@@ -87,8 +87,8 @@ build() {
 		-DWAMR_BUILD_REF_TYPES=1 \
 		"
 
-	export CFLAGS="${CFLAGS/-Os/-O2} -flto=auto"
-	export CXXLAGS="${CXXLAGS/-Os/-O2} -flto=auto"
+	export CFLAGS="${CFLAGS/-Os/-O2}"
+	export CXXLAGS="${CXXLAGS/-Os/-O2}"
 
 	cmake -B build/iwasm-gc -S product-mini/platforms/linux \
 		$common_args \

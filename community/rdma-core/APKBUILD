@@ -20,7 +20,6 @@ subpackages="$pkgname-libs $pkgname-dev $pkgname-doc $pkgname-openrc $pkgname-ud
 source="https://github.com/linux-rdma/rdma-core/releases/download/v$pkgver/rdma-core-$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_SYSCONFDIR=/etc \
 		-DCMAKE_INSTALL_PREFIX=/usr \

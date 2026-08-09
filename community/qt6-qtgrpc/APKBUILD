@@ -40,8 +40,6 @@ esac
 source="https://download.qt.io/$_rel/qt/${pkgver%.*}/${pkgver/_/-}/submodules/qtgrpc-everywhere-src-${pkgver/_/-}.tar.xz"
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -flto=auto"
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 		-DCMAKE_INSTALL_PREFIX=/usr \

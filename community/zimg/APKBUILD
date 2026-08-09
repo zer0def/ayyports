@@ -48,8 +48,8 @@ build() {
 		;;
 	esac
 
-	export CFLAGS="$CFLAGS -O2 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -O2 -flto=auto"
+	export CFLAGS="$CFLAGS -O2"
+	export CXXFLAGS="$CXXFLAGS -O2"
 
 	# build release binaries here without enabling tests,
 	# as they make zimg slower

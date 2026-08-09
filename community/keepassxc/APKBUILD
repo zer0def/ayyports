@@ -47,7 +47,6 @@ source="https://github.com/keepassxreboot/keepassxc/archive/refs/tags/$pkgver/ke
 	"
 
 build() {
-	export CXXFLAGS="$CXXFLAGS -flto=auto"
 
 	cmake -G Ninja -B build \
 		-DCMAKE_INSTALL_PREFIX=/usr \

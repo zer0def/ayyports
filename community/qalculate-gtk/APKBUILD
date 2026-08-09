@@ -19,7 +19,6 @@ source="https://github.com/Qalculate/qalculate-gtk/releases/download/v$pkgver/qa
 options="!check" # no test suite
 
 build() {
-	export CXXFLAGS="$CXXFLAGS -flto=auto"
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

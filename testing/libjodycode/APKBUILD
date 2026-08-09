@@ -17,7 +17,7 @@ build() {
 		NO_SIMD=1 \
 		NO_SSE2=1 \
 		NO_AVX2=1 \
-		CFLAGS="$CFLAGS -DNO_SSE2 -DNO_SIMD -DNO_AVX2 -flto=auto"
+		CFLAGS="$CFLAGS -DNO_SSE2 -DNO_SIMD -DNO_AVX2"
 }
 
 package() {

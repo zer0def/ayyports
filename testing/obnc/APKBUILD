@@ -13,7 +13,6 @@ source="$pkgname-$pkgver.tar.gz::https://miasap.se/obnc/downloads/${pkgname}_$pk
 	0001-disable-glibc-specific-stacktrace-support.patch
 	"
 build() {
-	CFLAGS="$CFLAGS -flto=auto" ./build --prefix=/usr
 }
 
 package() {

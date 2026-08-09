@@ -26,7 +26,6 @@ subpackages="$pkgname-doc $pkgname-xfce4"
 source="$pkgname-$pkgver.tar.gz::https://github.com/johanmalm/jgmenu/archive/v$pkgver.tar.gz"
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
 
 	./configure \
 		--prefix=/usr \

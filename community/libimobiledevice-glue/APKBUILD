@@ -11,7 +11,6 @@ subpackages="$pkgname-dev"
 source="https://github.com/libimobiledevice/libimobiledevice-glue/releases/download/$pkgver/libimobiledevice-glue-$pkgver.tar.bz2"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--host=$CHOST \
 		--build=$CBUILD \

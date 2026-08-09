@@ -45,7 +45,6 @@ source="https://github.com/Limine-Bootloader/Limine/releases/download/v$pkgver/l
 options="!check" # no tests in tarball
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

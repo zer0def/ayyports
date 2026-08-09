@@ -25,7 +25,6 @@ build() {
 		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
 	fi
 
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake3.5 -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=lib \

@@ -37,8 +37,8 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/falkTX/Carla/archive/refs/ta
 builddir="$srcdir/Carla-$pkgver"
 
 build() {
-	export CFLAGS="$CFLAGS -O3 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -O3 -flto=auto"
+	export CFLAGS="$CFLAGS -O3"
+	export CXXFLAGS="$CXXFLAGS -O3"
 	export LDFLAGS="$LDFLAGS -lfts"
 
 	make features

@@ -41,8 +41,6 @@ builddir="$srcdir/lib$pkgname-$pkgver"
 options="!check"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

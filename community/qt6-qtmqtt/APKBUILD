@@ -44,8 +44,6 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/qt/qtmqtt/archive/refs/tags/
 replaces="qt6-mqtt"
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -flto=auto"
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 		-DCMAKE_INSTALL_PREFIX=/usr

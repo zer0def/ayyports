@@ -35,8 +35,8 @@ source="https://pypi.python.org/packages/source/P/PyQt5/PyQt5-$pkgver.tar.gz"
 builddir="$srcdir/PyQt5-$pkgver"
 
 build() {
-	export CFLAGS="$CFLAGS -O2 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -O2 -flto=auto"
+	export CFLAGS="$CFLAGS -O2"
+	export CXXFLAGS="$CXXFLAGS -O2"
 	sip-build \
 		--confirm-license \
 		--qmake /usr/lib/qt5/bin/qmake \

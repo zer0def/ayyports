@@ -32,7 +32,7 @@ prepare() {
 }
 
 build() {
-	CFLAGS="$CFLAGS -O2 -flto=auto" \
+	CFLAGS="$CFLAGS -O2" \
 	EXTERNAL_LDFLAGS="$LDFLAGS" \
 	./configure \
 		--prefix=/usr \

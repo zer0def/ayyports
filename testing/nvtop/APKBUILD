@@ -28,7 +28,7 @@ build() {
 	*) local msm=OFF ;;
 	esac
 
-	CFLAGS="$CFLAGS -flto=auto -DNDEBUG" \
+	CFLAGS="$CFLAGS -DNDEBUG" \
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_BUILD_TYPE=None \

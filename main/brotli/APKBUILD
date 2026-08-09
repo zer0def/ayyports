@@ -34,7 +34,7 @@ prepare() {
 }
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto -O2"
+	export CFLAGS="$CFLAGS -O2"
 
 	# static libs, see https://github.com/google/brotli/issues/795
 	cmake -B build -G Ninja \

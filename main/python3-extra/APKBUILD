@@ -58,7 +58,6 @@ build() {
 		--enable-optimizations \
 		--disable-shared \
 		--without-static-libpython \
-		--with-lto \
 		--with-dbmliborder=gdbm:ndbm \
 		--with-computed-gotos
 

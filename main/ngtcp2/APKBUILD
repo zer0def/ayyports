@@ -30,7 +30,6 @@ build() {
 	_build build-static -DENABLE_SHARED_LIB=OFF
 
 	# NOTE: -DINTERPROCEDURAL_OPTIMIZATION=ON doesn't work here.
-	export CFLAGS="$CFLAGS -flto=auto"
 	_build build-shared -DENABLE_STATIC_LIB=OFF
 }
 

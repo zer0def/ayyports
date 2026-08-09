@@ -52,7 +52,6 @@ options="!check" # needs cpputest from community
 #     - CVE-2021-40114
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake3.5 -B build -G Ninja -Wno-dev \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

@@ -21,7 +21,7 @@ subpackages="
 source="https://github.com/storaged-project/libbytesize/releases/download/$pkgver/libbytesize-$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto -lintl" \
+	CFLAGS="$CFLAGS -lintl" \
 	./configure \
 		--host=$CHOST \
 		--build=$CBUILD \

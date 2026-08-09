@@ -23,7 +23,6 @@ source="https://mirrors.edge.kernel.org/pub/linux/utils/fs/xfs/xfsprogs/xfsprogs
 
 build() {
 	export DEBUG=-DNDEBUG
-	export OPTIMIZER="-flto=auto"
 	export CFLAGS="$CFLAGS -DOVERRIDE_SYSTEM_STATX -DSTATX__RESERVED=0x80000000U"
 	./configure \
 		--build=$CBUILD \

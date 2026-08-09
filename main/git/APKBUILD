@@ -137,8 +137,6 @@ prepare() {
 		INSTALL_SYMLINKS=1
 		CC=${CC:-cc}
 		CXX=${CC:-c++}
-		CFLAGS=$CFLAGS -flto=auto
-		LDFLAGS=$LDFLAGS -flto=auto
 		USE_LIBPCRE2=YesPlease
 		PYTHON_PATH=/usr/bin/python3
 		NO_RUST=YesPlease

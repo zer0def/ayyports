@@ -13,7 +13,7 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/Cyan4973/xxHash/archive/v$pk
 builddir="$srcdir/xxHash-$pkgver"
 
 build() {
-	export CFLAGS="$CFLAGS -DXXH_FORCE_MEMORY_ACCESS=1 -flto=auto -O2"
+	export CFLAGS="$CFLAGS -DXXH_FORCE_MEMORY_ACCESS=1 -O2"
 
 	case "$CARCH" in
 	x86*)

@@ -13,7 +13,6 @@ subpackages="$pkgname-dev"
 source="https://xorg.freedesktop.org/archive/individual/lib/xcb-util-$pkgver.tar.xz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

@@ -20,7 +20,7 @@ source="https://invisible-island.net/archives/xterm/xterm-$pkgver.tgz"
 #     - CVE-2021-27135
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto -D_BSD_SOURCE"
+	export CFLAGS="$CFLAGS -D_BSD_SOURCE"
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

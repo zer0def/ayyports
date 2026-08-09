@@ -32,7 +32,6 @@ _repo_url="https://invent.kde.org/multimedia/kid3.git"
 source="https://download.kde.org/stable/kid3/$pkgver/kid3-$pkgver.tar.xz"
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DCMAKE_INSTALL_PREFIX=/usr \

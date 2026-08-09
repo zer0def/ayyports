@@ -37,7 +37,7 @@ builddir="$srcdir"/Linux-PAM-$pkgver
 #     - CVE-2020-27780
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto $(pkg-config --cflags libutmps)"
+	export CFLAGS="$CFLAGS $(pkg-config --cflags libutmps)"
 	export LDFLAGS="$LDFLAGS $(pkg-config --libs libutmps)"
 	abuild-meson \
 		-Dexamples=false \

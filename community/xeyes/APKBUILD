@@ -20,7 +20,6 @@ subpackages="$pkgname-doc"
 source="https://www.x.org/releases/individual/app/xeyes-$pkgver.tar.xz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--host=$CHOST \
 		--build=$CBUILD \

@@ -32,7 +32,6 @@ source="https://download.kde.org/stable/release-service/$pkgver/src/ghostwriter-
 options="!check"
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

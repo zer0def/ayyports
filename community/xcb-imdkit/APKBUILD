@@ -19,7 +19,6 @@ subpackages="$pkgname-dev"
 source="https://github.com/fcitx/xcb-imdkit/archive/$pkgver/xcb-imdkit-$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake -B build -G Ninja -Wno-dev \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DCMAKE_INSTALL_PREFIX=/usr \

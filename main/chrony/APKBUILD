@@ -71,7 +71,6 @@ build() {
 
 _build() {
 	CPPFLAGS="$CPPFLAGS -I./pps-tools/" \
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--prefix=/usr \
 		--mandir=/usr/share/man \

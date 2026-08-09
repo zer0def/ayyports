@@ -35,7 +35,7 @@ options="!check" # no tests for qt6 flavour
 build() {
 	# -Os segfault at
 	# qt{5,6}/widgetsaddons/fcitxqtkeysequencewidget.cpp keyReleaseEvent QList<Key>({key})
-	CXXFLAGS="$CXXFLAGS -flto=auto -O2 -DNDEBUG" \
+	CXXFLAGS="$CXXFLAGS -O2 -DNDEBUG" \
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=lib \

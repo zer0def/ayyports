@@ -97,8 +97,8 @@ build() {
 	esac
 
 	# -g1: significantly reduce debug symbol size
-	export CFLAGS="$CFLAGS -g1 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -g1 -flto=auto"
+	export CFLAGS="$CFLAGS -g1"
+	export CXXFLAGS="$CXXFLAGS -g1"
 	cmake -B build -G Ninja -Wno-dev \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX=/usr \

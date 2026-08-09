@@ -36,7 +36,6 @@ build() {
 	if [ "$CBUILD" != "$CHOST" ]; then
 		local crossopts="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
 	fi
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DPYTHON_EXECUTABLE=/usr/bin/python3 \

@@ -23,8 +23,8 @@ subpackages="$pkgname-dev $pkgname-libs $pkgname-doc"
 source="https://pari.math.u-bordeaux.fr/pub/pari/unix/pari-$pkgver.tar.gz"
 
 build() {
-	export CFLAGS="${CFLAGS//-Os/-O2} -flto=auto"
-	export CPPFLAGS="${CPPFLAGS//-Os/-O2} -flto=auto"
+	export CFLAGS="${CFLAGS//-Os/-O2}"
+	export CPPFLAGS="${CPPFLAGS//-Os/-O2}"
 	./Configure \
 		--prefix=/usr \
 		--mt=pthread \

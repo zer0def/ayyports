@@ -34,7 +34,7 @@ subpackages="
 source="https://download.savannah.gnu.org/releases/m17n/m17n-lib-$pkgver.tar.gz"
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto $(pkg-config --cflags glib-2.0)"
+	export CFLAGS="$CFLAGS $(pkg-config --cflags glib-2.0)"
 	export LIBS="-lintl"
 
 	./configure \

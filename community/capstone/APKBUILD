@@ -36,7 +36,7 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/capstone-engine/capstone/arc
 #     - CVE-2025-68114
 
 build() {
-	export CFLAGS="${CFLAGS//-Os/-O2} -flto=auto -ffat-lto-objects"
+	export CFLAGS="${CFLAGS//-Os/-O2}"
 	make
 
 	cd bindings/python

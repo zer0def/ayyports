@@ -22,8 +22,8 @@ source="https://github.com/complexlogic/rsgain/releases/download/v$pkgver/rsgain
 options="!check"
 
 build() {
-	CXXFLAGS="${CXXFLAGS//-Os/-O2} -flto=auto" \
-	CFLAGS="${CFLAGS//-Os/-O2} -flto=auto" \
+	CXXFLAGS="${CXXFLAGS//-Os/-O2}" \
+	CFLAGS="${CFLAGS//-Os/-O2}" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr

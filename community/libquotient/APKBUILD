@@ -21,7 +21,6 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/quotient-im/libQuotient/arch
 builddir="$srcdir/libQuotient-$pkgver"
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DCMAKE_INSTALL_PREFIX=/usr \

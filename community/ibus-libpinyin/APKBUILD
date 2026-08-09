@@ -22,8 +22,6 @@ source="https://github.com/libpinyin/ibus-libpinyin/releases/download/$pkgver/ib
 options="!check" # there are none
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	./configure \
 		--host=$CHOST \
 		--build=$CBUILD \

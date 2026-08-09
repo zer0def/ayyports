@@ -16,7 +16,6 @@ builddir="$srcdir/$pkgname-v$pkgver"
 options="!check" # no test suite
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DCMAKE_INSTALL_PREFIX=/usr \

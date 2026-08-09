@@ -26,8 +26,8 @@ build() {
 	if [ "$CBUILD" != "$CHOST" ]; then
 		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
 	fi
-	CFLAGS="$CFLAGS -O2 -flto=auto -ffat-lto-objects -DNDEBUG" \
-	CXXFLAGS="$CXXFLAGS -O2 -flto=auto -ffat-lto-objects -DNDEBUG" \
+	CFLAGS="$CFLAGS -O2 -DNDEBUG" \
+	CXXFLAGS="$CXXFLAGS -O2 -DNDEBUG" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

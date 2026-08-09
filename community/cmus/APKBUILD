@@ -35,7 +35,6 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/cmus/cmus/archive/v$pkgver.t
 	"
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
 	./configure prefix=/usr
 	make
 }

@@ -14,7 +14,6 @@ source="https://www.x.org/releases/individual/lib/libXt-$pkgver.tar.xz"
 builddir="$srcdir"/libXt-$pkgver
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

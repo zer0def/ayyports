@@ -12,7 +12,7 @@ subpackages="$pkgname-doc"
 source="https://zlib.net/pigz/pigz-$pkgver.tar.gz"
 
 build() {
-	make LDFLAGS="$LDFLAGS" CFLAGS="$CFLAGS -O3 -flto=auto" pigz
+	make LDFLAGS="$LDFLAGS" CFLAGS="$CFLAGS -O3" pigz
 }
 
 check() {

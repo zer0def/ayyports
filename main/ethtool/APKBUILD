@@ -12,7 +12,6 @@ subpackages="$pkgname-doc $pkgname-bash-completion"
 source="https://www.kernel.org/pub/software/network/ethtool/ethtool-$pkgver.tar.xz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

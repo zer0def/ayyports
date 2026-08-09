@@ -57,8 +57,7 @@ build() {
 
 	# their cmake uses the clang_include_dirs only, but our llvm include dirs
 	# are in another castle
-	export CXXFLAGS="$CXXFLAGS -flto=auto -U_FORTIFY_SOURCE -I/usr/include/llvm$_llvmver"
-	export CFLAGS="$CFLAGS -flto=auto"
+	export CXXFLAGS="$CXXFLAGS -U_FORTIFY_SOURCE -I/usr/include/llvm$_llvmver"
 	export PATH="/usr/lib/llvm$_llvmver/bin:$PATH"
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \

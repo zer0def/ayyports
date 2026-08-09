@@ -17,7 +17,6 @@ source="https://github.com/graygnuorg/pound/releases/download/v$pkgver/pound-$pk
 	"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

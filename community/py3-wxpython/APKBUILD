@@ -34,7 +34,6 @@ builddir="$srcdir"/wxpython-$pkgver
 options="!check !spdx"
 
 build() {
-	export CPPFLAGS="$CPPFLAGS -flto=auto"
 	# regenerating sip bindings first to match local wxwidgets version,
 	# then run build
 	python3 build.py sip build_py --use_syswx --release -j${JOBS:-1}

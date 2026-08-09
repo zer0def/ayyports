@@ -24,7 +24,6 @@ build() {
 	make \
 		CC="${CC:-cc}" \
 		version="$pkgver" \
-		EXTRA_CFLAGS="$CFLAGS -flto=auto"
 }
 
 package() {

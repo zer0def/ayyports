@@ -18,8 +18,8 @@ builddir="$srcdir/ZArchive-$pkgver"
 options="!check" # no tests
 
 build() {
-	CFLAGS="$CFLAGS -O2 -flto=auto -DNDEBUG" \
-	CXXFLAGS="$CXXFLAGS -O2 -flto=auto -DNDEBUG" \
+	CFLAGS="$CFLAGS -O2 -DNDEBUG" \
+	CXXFLAGS="$CXXFLAGS -O2 -DNDEBUG" \
 	cmake -B build -G Ninja -Wno-dev \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

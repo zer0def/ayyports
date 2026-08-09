@@ -101,8 +101,7 @@ build() {
 		--enable-libpaper \
 		--enable-ssl=yes \
 		--enable-gnutls \
-		--disable-launchd \
-		--with-optim="$CFLAGS -flto=auto"
+		--disable-launchd
 	make
 }
 

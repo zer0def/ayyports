@@ -23,8 +23,6 @@ makedepends="
 source="https://downloads.sourceforge.net/enlightenment/imlib2-$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

@@ -122,8 +122,6 @@ source="https://download.osgeo.org/libtiff/tiff-$pkgver.tar.gz"
 #     - CVE-2017-5225
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake3.5 -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_BUILD_TYPE=MinSizeRel

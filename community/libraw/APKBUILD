@@ -54,8 +54,8 @@ prepare() {
 
 build() {
 	# trading size for more speed
-	CFLAGS="$CFLAGS -O3 -flto=auto -DLIBRAW_OWN_SWAB" \
-	CXXFLAGS="$CXXFLAGS -O3 -flto=auto -DLIBRAW_OWN_SWAB" \
+	CFLAGS="$CFLAGS -O3 -DLIBRAW_OWN_SWAB" \
+	CXXFLAGS="$CXXFLAGS -O3 -DLIBRAW_OWN_SWAB" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

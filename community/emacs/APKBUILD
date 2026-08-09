@@ -82,8 +82,8 @@ prepare() {
 _build_variant() {
 	cd "$builddir/$1"
 	shift
-	CFLAGS="${CFLAGS//-Os/-O2} -flto=auto" \
-	CXXFLAGS="${CXXFLAGS//-Os/-O2} -flto=auto" \
+	CFLAGS="${CFLAGS//-Os/-O2}" \
+	CXXFLAGS="${CXXFLAGS//-Os/-O2}" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

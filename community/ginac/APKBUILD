@@ -14,8 +14,8 @@ source="$pkgname-$pkgver.tar.gz::https://codeberg.org/ginac/ginac/archive/releas
 builddir="$srcdir/$pkgname"
 
 build() {
-	CXXFLAGS="${CXXFLAGS//-Os/-O2} -flto=auto" \
-	CFLAGS="${CFLAGS//-Os/-O2} -flto=auto" \
+	CXXFLAGS="${CXXFLAGS//-Os/-O2}" \
+	CFLAGS="${CFLAGS//-Os/-O2}" \
 	cmake3.5 -B build -G Ninja -Wno-dev \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_PREFIX_PATH=/usr \

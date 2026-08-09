@@ -12,7 +12,7 @@ subpackages="$pkgname-dev $pkgname-libs"
 source="$pkgname-$pkgver.tar.gz::https://github.com/alembic/alembic/archive/$pkgver.tar.gz"
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto -fno-ipa-cp"
+	CXXFLAGS="$CXXFLAGS -fno-ipa-cp"
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_BUILD_TYPE=Release \

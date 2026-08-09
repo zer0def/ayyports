@@ -27,7 +27,6 @@ prepare() {
 }
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--host=$CHOST \
 		--build=$CBUILD \

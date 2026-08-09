@@ -46,8 +46,6 @@ build() {
 		export CFLAGS="$CFLAGS -D_FORCE_SOFTWARE_SHA"
 		;;
 	esac
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	./configure \
 		--prefix=/usr \
 		--sysconfdir=/etc \

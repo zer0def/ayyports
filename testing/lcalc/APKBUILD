@@ -11,8 +11,8 @@ makedepends="gengetopt gmp-dev pari-dev"
 subpackages="$pkgname-dev $pkgname-libs $pkgname-doc"
 source="https://gitlab.com/-/project/12934202/uploads/679cb360a06a713233876cd6fa0ba2fa/lcalc-$pkgver.tar.xz"
 build() {
-	CFLAGS="$CFLAGS -O2 -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -O2 -flto=auto" \
+	CFLAGS="$CFLAGS -O2" \
+	CXXFLAGS="$CXXFLAGS -O2" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

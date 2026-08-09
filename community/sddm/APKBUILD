@@ -50,7 +50,6 @@ source="https://github.com/sddm/sddm/archive/v$pkgver/sddm-v$pkgver.tar.gz
 #     - CVE-2020-28049
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

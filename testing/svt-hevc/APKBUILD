@@ -14,8 +14,6 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/OpenVisualCloud/SVT-HEVC/arc
 builddir="$srcdir/SVT-HEVC-$pkgver"
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=lib \

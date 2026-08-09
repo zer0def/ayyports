@@ -25,7 +25,7 @@ builddir="$srcdir/Cutter-v$pkgver"
 options="!check" # upstream does not provide a testsuite
 
 build() {
-	CXXFLAGS="$CXXFLAGS -O2 -flto=auto" \
+	CXXFLAGS="$CXXFLAGS -O2" \
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=lib \

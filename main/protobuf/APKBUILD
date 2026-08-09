@@ -44,8 +44,8 @@ armhf) options="$options !check" ;;
 esac
 
 build() {
-	export CFLAGS="$CFLAGS -DNDEBUG -O2 -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -DNDEBUG -O2 -flto=auto -Wno-deprecated-declarations"
+	export CFLAGS="$CFLAGS -DNDEBUG -O2"
+	export CXXFLAGS="$CXXFLAGS -DNDEBUG -O2 -Wno-deprecated-declarations"
 
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \

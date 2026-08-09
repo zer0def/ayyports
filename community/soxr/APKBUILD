@@ -20,7 +20,6 @@ build() {
 		-DCMAKE_BUILD_TYPE=None
 	cmake --build build-static
 
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake3.5 -B build-shared -G Ninja \
 		-DCMAKE_INSTALL_PREFIX:PATH=/usr \
 		-DBUILD_SHARED_LIBS=True \

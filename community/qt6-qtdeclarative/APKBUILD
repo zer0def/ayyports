@@ -47,8 +47,6 @@ _qt6_prefix=usr/lib/qt6
 
 build() {
 	export PATH="$PATH:/usr/lib/qt6/bin"
-	export CFLAGS="$CFLAGS -flto=auto"
-	export CXXFLAGS="$CXXFLAGS -flto=auto"
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 		-DINSTALL_PUBLICBINDIR=usr/bin \

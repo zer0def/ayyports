@@ -83,7 +83,6 @@ source="https://www.thekelleys.org.uk/dnsmasq/dnsmasq-$pkgver.tar.xz
 #     - CVE-2017-14496
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
 	make LDFLAGS="$LDFLAGS" CFLAGS="$CFLAGS" COPTS="-DHAVE_DNSSEC" all
 	mv src/dnsmasq src/dnsmasq~dnssec
 

@@ -18,7 +18,6 @@ builddir="$srcdir/snort3_extra-$pkgver"
 options="!check" # doesn't have any tests
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake3.5 -B build -G Ninja -Wno-dev \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr

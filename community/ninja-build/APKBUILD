@@ -30,7 +30,7 @@ build() {
 	# well as as conflict with samurai.
 	# add /usr/lib/ninja-build/bin to PATH or invoke it directly to use it.
 	# or, add the compat subpackage here.
-	CXXFLAGS="${CXXFLAGS//-Os/-O2} -flto=auto -DNDEBUG" \
+	CXXFLAGS="${CXXFLAGS//-Os/-O2} -DNDEBUG" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr/lib/ninja-build \

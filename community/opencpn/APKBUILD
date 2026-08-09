@@ -42,7 +42,6 @@ builddir="$srcdir/OpenCPN-Release_$pkgver"
 options="!check" # todo
 
 build() {
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake3.5 -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

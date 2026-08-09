@@ -16,7 +16,6 @@ prepare() {
 }
 
 build() {
-	make CFLAGS="$CFLAGS -flto=auto"
 }
 
 check() {

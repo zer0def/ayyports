@@ -12,7 +12,6 @@ subpackages="$pkgname-doc"
 source="https://www.ivarch.com/programs/sources/pv-$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

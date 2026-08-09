@@ -33,7 +33,6 @@ options="!check" # no test suite
 
 build() {
 	# Compile with LTO to reduce binary size.
-	export CXXFLAGS="$CXXFLAGS -flto=auto"
 
 	./configure \
 		--build=$CBUILD \

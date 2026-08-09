@@ -66,7 +66,6 @@ prepare() {
 build() {
 	export PYTHON=python3
 
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--prefix=/usr \
 		--localstatedir=/run/frr \

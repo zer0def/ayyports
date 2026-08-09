@@ -13,7 +13,7 @@ source="https://www.nasm.us/pub/nasm/releasebuilds/$pkgver/nasm-$pkgver.tar.xz
 	"
 
 build() {
-	CFLAGS="$CFLAGS -O2 -flto=auto" \
+	CFLAGS="$CFLAGS -O2" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

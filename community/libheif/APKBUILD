@@ -88,7 +88,7 @@ done
 build() {
 	# This is en/decoder, so performance matters more than size.
 	export CFLAGS="${CFLAGS/-Os/}"
-	export CXXFLAGS="${CXXFLAGS/-Os/} -flto=auto"
+	export CXXFLAGS="${CXXFLAGS/-Os/}"
 
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \

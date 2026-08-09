@@ -45,8 +45,8 @@ prepare() {
 }
 
 build() {
-	export CFLAGS="$CFLAGS -O2 -flto=auto -U_FORTIFY_SOURCE"
-	export CXXFLAGS="$CXXFLAGS -O2 -flto=auto -U_FORTIFY_SOURCE"
+	export CFLAGS="$CFLAGS -O2 -U_FORTIFY_SOURCE"
+	export CXXFLAGS="$CXXFLAGS -O2 -U_FORTIFY_SOURCE"
 
 	# Deactivate wxsmith-related plugins because they depend on wxpropgrid
 	./configure \

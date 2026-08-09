@@ -62,7 +62,6 @@ esac
 #     - CVE-2017-8365
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake3.5 -B build-shared -G Ninja \
 		-DBUILD_SHARED_LIBS=ON \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \

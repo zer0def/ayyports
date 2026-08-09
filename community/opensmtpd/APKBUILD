@@ -49,7 +49,7 @@ build() {
 }
 
 _build() {
-	CFLAGS="$CFLAGS -flto=auto -I/usr/include/openssl" \
+	CFLAGS="$CFLAGS -I/usr/include/openssl" \
 	./configure \
 		--prefix=/usr \
 		--sysconfdir=/etc/smtpd \

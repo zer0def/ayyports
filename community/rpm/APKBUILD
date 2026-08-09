@@ -76,7 +76,6 @@ prepare() {
 }
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
 
 	cmake -B _build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \

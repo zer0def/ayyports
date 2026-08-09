@@ -18,7 +18,7 @@ x86) export CXXFLAGS="$CXXFLAGS -DCRYPTOPP_DISABLE_SSE2" ;;
 esac
 
 build() {
-	make dynamic libcryptopp.pc CXXFLAGS="$CXXFLAGS -flto=auto -fPIC" PREFIX="/usr"
+	make dynamic libcryptopp.pc CXXFLAGS="$CXXFLAGS -fPIC" PREFIX="/usr"
 }
 
 check() {

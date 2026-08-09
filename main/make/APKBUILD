@@ -14,7 +14,6 @@ source="https://ftp.gnu.org/gnu/make/make-$pkgver.tar.gz
 	"
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

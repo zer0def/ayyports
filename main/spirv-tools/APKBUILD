@@ -20,7 +20,7 @@ build() {
 	fi
 
 	# reduce size of debug syms, lto
-	CXXFLAGS="$CXXFLAGS -g1 -flto=auto" \
+	CXXFLAGS="$CXXFLAGS -g1" \
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=lib \

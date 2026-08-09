@@ -50,7 +50,6 @@ options="!check"
 #     - CVE-2017-14166
 
 build() {
-	CFLAGS="$CFLAGS -ffat-lto-objects -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

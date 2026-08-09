@@ -14,7 +14,6 @@ subpackages="$pkgname-dev $pkgname-doc"
 source="https://downloads.sourceforge.net/freeglut/freeglut-$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DCMAKE_INSTALL_PREFIX=/usr \

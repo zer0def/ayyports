@@ -78,8 +78,6 @@ prepare() {
 }
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	./configure \
 		--prefix=/usr \
 		--sysconfdir=/etc/syslog-ng \

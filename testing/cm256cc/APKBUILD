@@ -17,8 +17,6 @@ checkdepends="xvfb-run"
 source="$pkgname-$pkgver.tar.gz::https://github.com/f4exb/cm256cc/archive/refs/tags/v$pkgver.tar.gz"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX=/usr \

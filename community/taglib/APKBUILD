@@ -24,8 +24,6 @@ source="https://taglib.github.io/releases/taglib-$pkgver.tar.gz
 #     - CVE-2018-11439
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	cmake -B build -G Ninja \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \

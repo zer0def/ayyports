@@ -27,8 +27,8 @@ source="https://github.com/SFML/SFML/archive/$pkgver/sfml-$pkgver.tar.gz"
 builddir="$srcdir/SFML-$pkgver"
 
 build() {
-	CFLAGS="$CFLAGS -DNDEBUG -O2 -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -DNDEBUG -O2 -flto=auto" \
+	CFLAGS="$CFLAGS -DNDEBUG -O2" \
+	CXXFLAGS="$CXXFLAGS -DNDEBUG -O2" \
 	cmake -B build-shared -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
 		-DCMAKE_INSTALL_PREFIX=/usr \

@@ -12,8 +12,6 @@ source="https://ftp.gnu.org/pub/gnu/diffutils/diffutils-$pkgver.tar.xz
 	skip-meaningless-pthread-rwlock-test.patch"
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
-	CXXFLAGS="$CXXFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

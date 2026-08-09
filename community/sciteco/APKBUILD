@@ -44,8 +44,8 @@ _configure() {
 }
 
 build() {
-	export CFLAGS="${CFLAGS//-Os/-O3} -flto=auto"
-	export CXXFLAGS="${CXXFLAGS//-Os/-O3} -flto=auto"
+	export CFLAGS="${CFLAGS//-Os/-O3}"
+	export CXXFLAGS="${CXXFLAGS//-Os/-O3}"
 
 	_configure \
 		--with-interface=ncurses

@@ -20,7 +20,6 @@ source="
 #     - CVE-2023-46316
 
 build() {
-	make CFLAGS="$CFLAGS -flto=auto" LDFLAGS="$LDFLAGS"
 }
 
 package() {

@@ -36,8 +36,8 @@ options="!check"
 build() {
 	# build fix for arm
 	export CROSS=" "
-	export CFLAGS="$CFLAGS -O2 -flto=auto -ffat-lto-objects"
-	export CXXFLAGS="$CXXFLAGS -O2 -flto=auto -ffat-lto-objects"
+	export CFLAGS="$CFLAGS -O2"
+	export CXXFLAGS="$CXXFLAGS -O2"
 	./configure \
 		--prefix=/usr \
 		--disable-install-srcs \

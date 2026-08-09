@@ -305,7 +305,6 @@ _build() {
 }
 
 build() {
-	export CFLAGS="$CFLAGS -flto=auto"
 	_build \
 		--without-x \
 		--without-wayland \

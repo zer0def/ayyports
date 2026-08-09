@@ -36,7 +36,6 @@ source="https://ftp.gnu.org/gnu/wget/wget-$pkgver.tar.gz"
 #     - CVE-2017-13090
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--build=$CBUILD \
 		--host=$CHOST \

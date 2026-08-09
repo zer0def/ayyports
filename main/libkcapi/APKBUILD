@@ -27,7 +27,6 @@ prepare() {
 }
 
 build() {
-	CFLAGS="$CFLAGS -flto=auto" \
 	./configure \
 		--prefix=/usr \
 		--build=$CBUILD \

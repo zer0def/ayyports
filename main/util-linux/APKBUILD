@@ -145,7 +145,7 @@ build() {
 		# 20 kiB in total for util-linux-*, versus 196 kiB (libskarnet.so).
 		# TODO: Find a better way (libutmps.so w/o dependency on libskarnet.so)?
 		# also throw in lto when not bootstrapping
-		export CFLAGS="$CFLAGS -ffat-lto-objects -flto=auto $(pkg-config --cflags --static libutmps)"
+		export CFLAGS="$CFLAGS $(pkg-config --cflags --static libutmps)"
 		export LDFLAGS="$LDFLAGS $(pkg-config --libs --static libutmps) $(pkg-config --libs libeconf)"
 	fi
 

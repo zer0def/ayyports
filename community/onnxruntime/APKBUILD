@@ -74,8 +74,8 @@ prepare() {
 
 build() {
 	# to build with backtrace support see https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/104971#note_629141
-	CFLAGS="$CFLAGS -O2 -flto=auto" \
-	CXXFLAGS="$CXXFLAGS $_extra_cxxflags -O2 -Wno-deprecated-declarations -Wno-error=template-id-cdtor -flto=auto -U_FORTIFY_SOURCE" \
+	CFLAGS="$CFLAGS -O2" \
+	CXXFLAGS="$CXXFLAGS $_extra_cxxflags -O2 -Wno-deprecated-declarations -Wno-error=template-id-cdtor -U_FORTIFY_SOURCE" \
 	LDFLAGS="$LDFLAGS -Wl,--copy-dt-needed-entries" \
 	cmake -S cmake -B build -G Ninja \
 		-DCMAKE_BUILD_TYPE=None \
